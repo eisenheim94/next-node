@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #faf8f2;
+  --foreground: #171717;
+  --muted: #efe8da;
+  --muted-foreground: #5e5646;
+  --border: #d9cfbc;
+  --card: #fffdf8;
+  --card-foreground: #171717;
+}
+
+body {
+  background: radial-gradient(circle at top, #fff7e8 0%, var(--background) 45%);
+  color: var(--foreground);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}

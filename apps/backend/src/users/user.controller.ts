@@ -1,9 +1,9 @@
-import { Body, Controller, Post, Get, Patch, Delete, Param } from "@nestjs/common";
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
-import { UserEntity } from "./entities/user.entity";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UserService } from "./user.service";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { Body, Controller, Post, Get, Patch, Delete, Param } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { UserEntity } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserService } from './user.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('users')
 @Controller('users')

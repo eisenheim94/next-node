@@ -12,11 +12,21 @@ export default function HomePage() {
             Issue Tracker Frontend
           </h1>
           <p className='mt-4 max-w-2xl text-lg leading-8 text-stone-700'>
-            Start with the two core resources: projects and issues.
+            Start with the three core resources: users, projects, and issues.
           </p>
         </section>
 
-        <section className='grid gap-4 md:grid-cols-2'>
+        <section className='grid gap-4 md:grid-cols-3'>
+          <Link
+            href='/users'
+            className='rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-0.5'
+          >
+            <h2 className='text-xl font-medium text-stone-900'>Users</h2>
+            <p className='mt-2 text-stone-600'>
+              Create reporters and assignees for issues.
+            </p>
+          </Link>
+
           <Link
             href='/projects'
             className='rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-0.5'

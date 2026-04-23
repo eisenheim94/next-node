@@ -18,14 +18,18 @@ This project naturally covers:
 We will start with plain `fetch`, move to stronger frontend state architecture later, and leave WebSockets, charts, and Playwright for the final stages.
 
 ## Teaching Workflow
+- Default learning mode: the learner writes all implementation code manually. The assistant should explain exactly what to write, where to write it, and why, but should not edit project files unless the learner explicitly asks for direct code changes.
 - Each phase should be covered as a complete implementation slice, not partially. If a phase needs backend, frontend, infrastructure, validation, or tests to be meaningfully usable, the teaching messages should cover the whole slice before moving on.
 - Do not jump from unfinished backend work to frontend implementation unless the message explicitly says the backend is still a prerequisite and names the missing files or routes.
 - Explanations should describe what to write, where to write it, how it works, and why the design is chosen.
+- When giving implementation help, prefer incremental steps over dropping a finished solution. The learner should have a chance to type, run, and understand each step before moving on.
 - Starting in later phases, some checkpoints should shift into learner-led implementation: you try the code first, then the reference solution can be shown in a collapsible section.
 
 ## Implementation Phases
 
 ### Phase 0: Foundations and architecture
+Status: Completed
+
 Set up frontend, backend, PostgreSQL, RabbitMQ, and the initial project structure.
 
 Focus:
@@ -38,6 +42,17 @@ Quiz:
 - architecture and TypeScript fundamentals
 
 ### Phase 1: Database design and first CRUD
+Status: In progress
+Completed:
+- backend entities and TypeScript foundations for `User`, `Project`, and `Issue`
+- backend DTO design for projects
+- Phase 1 backend CRUD teaching flow and quiz
+
+Remaining:
+- learner writes the Phase 1 backend CRUD files manually in the repo from the chat guidance
+- learner builds the Phase 1 frontend pages with manual `fetch` from chat guidance only
+- learner wires the full Phase 1 flow end to end before moving to Phase 2
+
 Implement:
 - `User`
 - `Project`
@@ -49,6 +64,7 @@ Focus:
 - first complete REST endpoints
 - first frontend pages using manual `fetch`
 - backend and frontend wired end to end before Phase 2 begins
+- assistant acts as an instructor for this phase and should not directly implement the files unless explicitly asked to switch out of learning mode
 
 Quiz:
 - relations, DTOs, enum usage, CRUD flow

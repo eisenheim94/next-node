@@ -1,5 +1,6 @@
 import type { CreateIssueInput, Issue } from '@/types/issue';
 import type { CreateProjectInput, Project } from '@/types/project';
+import type { CreateUserInput, User } from '@/types/user';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
@@ -9,6 +10,26 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+export async function getUsers(): Promise<User[]> {
+  const response = await fetch(`${API_URL}/users`, {
+    cache: 'no-store',
+  });
+
+  return handleResponse<User[]>(response);
+}
+
+export async function createUser(input: CreateUserInput): Promise<User> {
+  const response = await fetch(`${API_URL}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+
+  return handleResponse<User>(response);
 }
 
 export async function getProjects(): Promise<Project[]> {

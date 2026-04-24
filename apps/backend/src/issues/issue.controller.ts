@@ -6,8 +6,10 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
@@ -17,11 +19,14 @@ import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
 import { IssueEntity } from './entities/issue.entity';
 import { IssueService } from './issue.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('issues')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('issues')
 export class IssueController {
-  constructor(private readonly issueService: IssueService) {}
+  constructor(private readonly issueService: IssueService) { }
 
   @Post()
   @ApiCreatedResponse({ type: IssueEntity })

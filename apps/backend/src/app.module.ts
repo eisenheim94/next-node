@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { IssueModule } from './issues/issue.module';
 import { ProjectModule } from './projects/project.module';
 import { UserModule } from './users/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './users/user.module';
         synchronize: false,
       }),
     }),
+    AuthModule,
     UserModule,
     ProjectModule,
     IssueModule,

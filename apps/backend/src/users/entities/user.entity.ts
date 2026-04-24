@@ -21,6 +21,12 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 120 })
   displayName!: string;
 
+  @Column({type: 'varchar', length: 255})
+  passwordHash!: string;
+
+  @Column({type: 'varchar', length: 255, nullable: true})
+  hashedRefreshToken!: string | null;
+
   @Column({
     type: 'enum',
     enum: UserRole,

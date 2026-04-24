@@ -8,54 +8,54 @@ import { ProjectEntity } from './entities/project.entity';
 
 @Injectable()
 export class ProjectService {
-    constructor(
-        @InjectRepository(ProjectEntity)
-        private readonly projectsRepository: Repository<ProjectEntity>,
-    ) {}
+  constructor(
+    @InjectRepository(ProjectEntity)
+    private readonly projectsRepository: Repository<ProjectEntity>,
+  ) {}
 
-    async create(createProjectDto: CreateProjectDto): Promise<ProjectEntity> {
-        const project = this.projectsRepository.create({
-            name: createProjectDto.name,
-            description: createProjectDto.description ?? null,
-        });
+  async create(createProjectDto: CreateProjectDto): Promise<ProjectEntity> {
+    const project = this.projectsRepository.create({
+      name: createProjectDto.name,
+      description: createProjectDto.description ?? null,
+    });
 
-        return this.projectsRepository.save(project);
+    return this.projectsRepository.save(project);
+  }
+
+  async findAll(): Promise<ProjectEntity[]> {
+    return this.projectsRepository.find({
+      order: {createdAt: 'DESC'},
+    });
+  }
+
+  async findOne(id: string): Promise<ProjectEntity> {
+    const project = await this.projectsRepository.findOne({
+      where: {id},
+    });
+
+    if (!project) {
+      throw new NotFoundException(`Project with id "${id}" was not found`);
     }
 
-    async findAll(): Promise<ProjectEntity[]> {
-        return this.projectsRepository.find({
-            order: {createdAt: 'DESC'},
-        });
+    return project
+  }
+
+  async update(id: string, updateProjectDto: UpdateProjectDto): Promise<ProjectEntity> {
+    const project = await this.findOne(id);
+
+    if (updateProjectDto.name !== undefined) {
+      project.name = updateProjectDto.name;
     }
 
-    async findOne(id: string): Promise<ProjectEntity> {
-        const project = await this.projectsRepository.findOne({
-            where: {id},
-        });
-
-        if (!project) {
-            throw new NotFoundException(`Project with id "${id}" was not found`);
-        }
-
-        return project
+    if (updateProjectDto.description !== undefined) {
+      project.description = updateProjectDto.description;
     }
 
-    async update(id: string, updateProjectDto: UpdateProjectDto): Promise<ProjectEntity> {
-        const project = await this.findOne(id);
+    return this.projectsRepository.save(project);
+  }
 
-        if (updateProjectDto.name !== undefined) {
-            project.name = updateProjectDto.name;
-        }
-
-        if (updateProjectDto.description !== undefined) {
-            project.description = updateProjectDto.description;
-        }
-
-        return this.projectsRepository.save(project);
-    }
-
-    async remove(id: string): Promise<void> {
-        const project = await this.findOne(id);
-        await this.projectsRepository.remove(project);
-    }
+  async remove(id: string): Promise<void> {
+    const project = await this.findOne(id);
+    await this.projectsRepository.remove(project);
+  }
 }

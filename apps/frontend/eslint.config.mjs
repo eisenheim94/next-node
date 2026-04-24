@@ -9,7 +9,7 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        project: "./tsconfig.json",
+        project: './tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
       },
       globals: {
@@ -23,6 +23,7 @@ export default tseslint.config(
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
       quotes: ['error', 'single', { avoidEscape: true }],
+      'jsx-quotes': ['error', 'prefer-single'],
     },
   },
   {

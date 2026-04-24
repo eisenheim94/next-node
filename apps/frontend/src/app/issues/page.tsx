@@ -37,12 +37,14 @@ export default function IssuesPage() {
         setProjects(projectsData);
         setUsers(usersData);
 
-        if (projectsData.length > 0) {
-          setProjectId(projectsData[0].id);
+        const firstProject = projectsData?.[0];
+        if (firstProject) {
+          setProjectId(firstProject.id);
         }
 
-        if (usersData.length > 0) {
-          setReporterId(usersData[0].id);
+        const firstUser = usersData?.[0];
+        if (firstUser) {
+          setReporterId(firstUser.id);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load issues');

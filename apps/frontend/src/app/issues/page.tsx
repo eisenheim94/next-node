@@ -40,6 +40,7 @@ export default function IssuesPage() {
   const [projectId, setProjectId] = useState('');
   const [reporterId, setReporterId] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
+
   const [issueQuery, setIssueQuery] = useState<GetIssuesParams>({
     page: 1,
     limit: 10,
@@ -47,6 +48,7 @@ export default function IssuesPage() {
     sortOrder: 'DESC',
   });
 
+  const [searchInput, setSearchInput] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -219,6 +221,51 @@ export default function IssuesPage() {
     }));
   }
 
+  function handleStatusFilterChange(value: string) {
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      status: value ? (value as IssueStatus) : undefined,
+    }));
+  }
+
+  function handlePriorityFilterChange(value: string) {
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      priority: value ? (value as IssuePriority) : undefined,
+    }));
+  }
+
+  function handleSortChange(value: string) {
+    const [sortBy, sortOrder] = value.split(':');
+
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      sortBy: sortBy as GetIssuesParams['sortBy'],
+      sortOrder: sortOrder as GetIssuesParams['sortOrder'],
+    }));
+  }
+
+  function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      search: searchInput.trim() || undefined,
+    }));
+  }
+
+  function clearSearch() {
+    setSearchInput('');
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      search: undefined,
+    }));
+  }
 
   return (
     <AuthGuard>
@@ -425,8 +472,112 @@ export default function IssuesPage() {
 
             {loading ? <p className='mt-4 text-stone-600'>Loading...</p> : null}
 
+            <form
+              className='mt-6 grid gap-4 rounded-2xl border bg-stone-50 p-4 md:grid-cols-2 xl:grid-cols-5'
+              onSubmit={(event) => {
+                handleSearchSubmit(event);
+              }}
+            >
+              <div className='xl:col-span-2'>
+                <label className='block text-sm font-medium text-stone-700'>
+                  Search
+                </label>
+                <input
+                  className='mt-2 w-full rounded-2xl border bg-white px-4 py-3'
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder='Search title or description'
+                />
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-stone-700'>
+                  Status
+                </label>
+                <select
+                  className='mt-2 w-full rounded-2xl border bg-white px-4 py-3'
+                  value={issueQuery.status ?? ''}
+                  onChange={(event) => {
+                    handleStatusFilterChange(event.target.value);
+                  }}
+                >
+                  <option value=''>All statuses</option>
+                  <option value='BACKLOG'>BACKLOG</option>
+                  <option value='TODO'>TODO</option>
+                  <option value='IN_PROGRESS'>IN_PROGRESS</option>
+                  <option value='DONE'>DONE</option>
+                </select>
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-stone-700'>
+                  Priority
+                </label>
+                <select
+                  className='mt-2 w-full rounded-2xl border bg-white px-4 py-3'
+                  value={issueQuery.priority ?? ''}
+                  onChange={(event) => {
+                    handlePriorityFilterChange(event.target.value);
+                  }}
+                >
+                  <option value=''>All priorities</option>
+                  <option value='LOW'>LOW</option>
+                  <option value='MEDIUM'>MEDIUM</option>
+                  <option value='HIGH'>HIGH</option>
+                </select>
+              </div>
+
+              <div>
+                <label className='block text-sm font-medium text-stone-700'>
+                  Sort
+                </label>
+                <select
+                  className='mt-2 w-full rounded-2xl border bg-white px-4 py-3'
+                  value={`${issueQuery.sortBy ?? 'createdAt'}:${issueQuery.sortOrder ?? 'DESC'}`}
+                  onChange={(event) => {
+                    handleSortChange(event.target.value);
+                  }}
+                >
+                  <option value='createdAt:DESC'>Newest first</option>
+                  <option value='createdAt:ASC'>Oldest first</option>
+                  <option value='updatedAt:DESC'>Recently updated</option>
+                  <option value='title:ASC'>Title A-Z</option>
+                  <option value='priority:DESC'>Priority high-low</option>
+                  <option value='status:ASC'>Status A-Z</option>
+                </select>
+              </div>
+
+              <div className='flex items-end gap-3 xl:col-span-5'>
+                <button
+                  type='submit'
+                  className='rounded-full bg-stone-900 px-5 py-3 text-white'
+                >
+                  Apply search
+                </button>
+
+                <button
+                  type='button'
+                  className='rounded-full border px-5 py-3 text-stone-700'
+                  onClick={clearSearch}
+                >
+                  Clear search
+                </button>
+              </div>
+            </form>
+
             {!loading && issues.length === 0 ? (
-              <p className='mt-4 text-stone-600'>No issues yet.</p>
+              <p className='mt-4 text-stone-600'>
+                No issues found for the current filters.
+              </p>
+            ) : null}
+
+            {issueQuery.search || issueQuery.status || issueQuery.priority ? (
+              <p className='mt-4 text-sm text-stone-500'>
+                Active filters:
+                {issueQuery.search ? ` search="${issueQuery.search}"` : ''}
+                {issueQuery.status ? ` status=${issueQuery.status}` : ''}
+                {issueQuery.priority ? ` priority=${issueQuery.priority}` : ''}
+              </p>
             ) : null}
 
             <div className='mt-6 space-y-4'>

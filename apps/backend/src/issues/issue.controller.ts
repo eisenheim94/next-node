@@ -27,7 +27,7 @@ import { IssueEntity } from './entities/issue.entity';
 import { IssueService } from './issue.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiErrorResponseDto } from 'src/auth/dto/api-error-response.dto';
-import { PaginatedIssuesRerponseDto } from './dto/paginated-issues-response.dto';
+import { PaginatedIssuesResponseDto } from './dto/paginated-issues-response.dto';
 import { ListIssuesQueryDto } from './dto/list-issues-query.dto';
 
 @ApiTags('issues')
@@ -46,11 +46,11 @@ export class IssueController {
   }
 
   @Get()
-  @ApiOkResponse({ type: IssueEntity, isArray: true })
+  @ApiOkResponse({ type: PaginatedIssuesResponseDto })
   @ApiBadRequestResponse({ type: ApiErrorResponseDto })
   findAll(
     @Query() query: ListIssuesQueryDto,
-  ): Promise<PaginatedIssuesRerponseDto> {
+  ): Promise<PaginatedIssuesResponseDto> {
     return this.issueService.findAll(query);
   }
 

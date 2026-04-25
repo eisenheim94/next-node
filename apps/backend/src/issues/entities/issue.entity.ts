@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import {
 import { IssuePriority, IssueStatus } from '../../core/types';
 import { ProjectEntity } from '../../projects/entities/project.entity';
 import { UserEntity } from '../../users/entities/user.entity';
+import { CommentEntity } from 'src/comments/entities/comment.entity';
 
 @Entity({ name: 'issues' })
 export class IssueEntity {
@@ -95,6 +97,9 @@ export class IssueEntity {
   })
   @Column({ type: 'uuid', nullable: true })
   assigneeId!: string | null;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.issue)
+  comments!: CommentEntity[];
 
   @ApiProperty({
     example: '2026-04-25T10:15:30.000Z',

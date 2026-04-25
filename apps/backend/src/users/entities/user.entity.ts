@@ -9,6 +9,7 @@ import {
 
 import { UserRole } from '../../core/types';
 import { IssueEntity } from '../../issues/entities/issue.entity';
+import { CommentEntity } from 'src/comments/entities/comment.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -21,10 +22,10 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 120 })
   displayName!: string;
 
-  @Column({type: 'varchar', length: 255})
+  @Column({ type: 'varchar', length: 255 })
   passwordHash!: string;
 
-  @Column({type: 'varchar', length: 255, nullable: true})
+  @Column({ type: 'varchar', length: 255, nullable: true })
   hashedRefreshToken!: string | null;
 
   @Column({
@@ -39,6 +40,9 @@ export class UserEntity {
 
   @OneToMany(() => IssueEntity, (issue) => issue.assignee)
   assignedIssues!: IssueEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.author)
+  comments!: CommentEntity[];
 
   @CreateDateColumn()
   createdAt!: Date;

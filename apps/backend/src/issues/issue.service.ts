@@ -18,7 +18,7 @@ export class IssueService {
     @InjectRepository(ProjectEntity)
     private readonly projectsRepository: Repository<ProjectEntity>,
     @InjectRepository(UserEntity)
-    private readonly usersRepositry: Repository<UserEntity>
+    private readonly usersRepositry: Repository<UserEntity>,
   ) { }
 
   async create(createIssueDto: CreateIssueDto): Promise<IssueEntity> {
@@ -125,7 +125,7 @@ export class IssueService {
     if (query.search) {
       queryBuilder.andWhere(
         '(issue.title ILIKE :search OR issue.description ILIKE :search)',
-        { search: `%${query.search}` },
+        { search: `%${query.search}%` },
       );
     }
 
@@ -188,11 +188,11 @@ export class IssueService {
   }
 
   private async ensureUserExists(userId: string, label: string): Promise<void> {
-    const project = await this.usersRepositry.findOne({
+    const user = await this.usersRepositry.findOne({
       where: { id: userId },
     });
 
-    if (!project) {
+    if (!user) {
       throw new NotFoundException(`${label} with id "${userId}" was not found`);
     }
   }

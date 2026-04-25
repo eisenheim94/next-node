@@ -8,6 +8,7 @@ import { IssueModule } from './issues/issue.module';
 import { ProjectModule } from './projects/project.module';
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
+import { CommentModule } from './comments/comment.module';
 
 @Module({
   imports: [
@@ -28,8 +29,9 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     ProjectModule,
     IssueModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

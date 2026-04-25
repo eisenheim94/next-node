@@ -51,17 +51,26 @@ export class ListIssuesQueryDto {
   @IsOptional()
   priority?: IssuePriority;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    example: '8c6a0d12-5e70-4d8e-a2a1-8e8c4d2f1b10',
+    format: 'uuid',
+  })
   @IsUUID()
   @IsOptional()
   projectId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    example: '43d7b7b5-9e5f-48d7-8d7f-c33c82db9c51',
+    format: 'uuid',
+  })
   @IsUUID()
   @IsOptional()
   reporterId?: string;
 
-  @ApiPropertyOptional({ format: 'uuid' })
+  @ApiPropertyOptional({
+    example: '2cb3e4f4-2f59-4f5a-b5a5-3b4b3c4e8f21',
+    format: 'uuid',
+  })
   @IsUUID()
   @IsOptional()
   assigneeId?: string;

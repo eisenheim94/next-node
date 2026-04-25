@@ -24,6 +24,7 @@ We will start with plain `fetch`, move to stronger frontend state architecture l
 - File instruction rule for all teaching responses: always show the file path for every file the learner needs to create or update before showing the code.
 - Path format rule for all teaching responses: always show repo-relative paths, not absolute filesystem paths.
 - Explanation rule for all teaching responses: for every file the learner creates or updates, explain what was added or changed, why it is needed, and how it works either immediately before or immediately after the file code.
+- Progress tracking rule: after finishing a meaningful checkpoint or a phase, explicitly review the repo state against the plan and update this file so phase status and completed/remaining items stay current.
 - Each phase should be covered as a complete implementation slice, not partially. If a phase needs backend, frontend, infrastructure, validation, or tests to be meaningfully usable, the teaching messages should cover the whole slice before moving on.
 - Do not jump from unfinished backend work to frontend implementation unless the message explicitly says the backend is still a prerequisite and names the missing files or routes.
 - Explanations should describe what to write, where to write it, how it works, and why the design is chosen.
@@ -47,16 +48,14 @@ Quiz:
 - architecture and TypeScript fundamentals
 
 ### Phase 1: Database design and first CRUD
-Status: In progress
+Status: Completed
 Completed:
 - backend entities and TypeScript foundations for `User`, `Project`, and `Issue`
 - backend DTO design for projects
 - Phase 1 backend CRUD teaching flow and quiz
-
-Remaining:
-- learner writes the Phase 1 backend CRUD files manually in the repo from the chat guidance
-- learner builds the Phase 1 frontend pages with manual `fetch` from chat guidance only
-- learner wires the full Phase 1 flow end to end before moving to Phase 2
+- backend CRUD endpoints for `User`, `Project`, and `Issue`
+- Phase 1 frontend pages using manual `fetch`
+- backend and frontend wired end to end for the first CRUD slice
 
 Implement:
 - `User`
@@ -75,6 +74,14 @@ Quiz:
 - relations, DTOs, enum usage, CRUD flow
 
 ### Phase 2: Auth, refresh tokens, roles, protected routes
+Status: Completed
+
+Completed:
+- register, login, logout, and refresh token backend flows
+- typed JWT payload and auth response/token contracts
+- JWT auth guard and role-based backend protection
+- protected frontend auth flow with login/register pages and route guarding
+
 Implement:
 - register/login/logout
 - JWT access + refresh tokens

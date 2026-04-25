@@ -27,6 +27,12 @@ When the user asks to continue the project, continue a phase, or asks what to bu
 3. Keep the work inside the current incomplete phase unless the user explicitly overrides that sequencing.
 4. Present the work as incremental teaching steps, not as an autonomous repo edit.
 
+After finishing a meaningful checkpoint or a phase:
+
+1. Review the repo state against `LEARNING_PLAN.md`.
+2. Ask whether the user wants the plan progress updated if they did not already request it.
+3. If they requested it, or clearly expect completion tracking, update `LEARNING_PLAN.md` before closing the task.
+
 ## File Teaching Rules
 
 When the learner is expected to type code manually:

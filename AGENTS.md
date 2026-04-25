@@ -31,6 +31,7 @@ This repository follows the learning workflow defined in `LEARNING_PLAN.md`.
 - If the user asks to continue the current or next phase, first restate the exact phase you are continuing and what remains from `LEARNING_PLAN.md`.
 - If the current phase is still incomplete, continue that phase instead of jumping ahead.
 - Require the current phase to be end-to-end meaningful before proposing the next phase.
+- After finishing a checkpoint or phase, review the repo against `LEARNING_PLAN.md` and update the plan progress before closing the work.
 
 ## Override Rule
 

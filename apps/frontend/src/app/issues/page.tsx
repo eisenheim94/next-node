@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
+import type { AuthUser } from '@/types/auth';
 
 import {
   createComment,
   createIssue,
   getCommentsByIssue,
   getIssues,
+  getMe,
   getProjects,
   getUsers,
 } from '@/lib/api';
@@ -32,6 +34,7 @@ export default function IssuesPage() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -56,15 +59,17 @@ export default function IssuesPage() {
 
   const loadData = async () => {
     try {
-      const [issuesData, projectsData, usersData] = await Promise.all([
+      const [issuesData, projectsData, usersData, currentUserData] = await Promise.all([
         getIssues(issueQuery),
         getProjects(),
         getUsers(),
+        getMe(),
       ]);
 
       setIssuesResponse(issuesData);
       setProjects(projectsData);
       setUsers(usersData);
+      setCurrentUser(currentUserData);
 
       const commentsEntries = await Promise.all(
         issuesData.items.map(async (issue) => [
@@ -81,9 +86,8 @@ export default function IssuesPage() {
         setProjectId(firstProject.id);
       }
 
-      const firstUser = usersData?.[0];
-      if (firstUser) {
-        setReporterId(firstUser.id);
+      if (currentUserData) {
+        setReporterId(currentUserData.id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load issues');
@@ -163,10 +167,15 @@ export default function IssuesPage() {
     }
   }
 
-  async function handleCommentSubmit(issueId: string, authorId: string) {
+  async function handleCommentSubmit(issueId: string) {
     const body = commentInputs[issueId]?.trim();
 
     if (!body) {
+      return;
+    }
+
+    if (!currentUser) {
+      setError('You must be signed in to comment');
       return;
     }
 
@@ -174,7 +183,7 @@ export default function IssuesPage() {
       const newComment = await createComment({
         body,
         issueId,
-        authorId,
+        authorId: currentUser.id,
       });
 
       setCommentsByIssue((current) => ({
@@ -630,6 +639,12 @@ export default function IssuesPage() {
                       )}
                     </div>
 
+                    {currentUser ? (
+                      <p className='text-xs text-stone-500'>
+                        Commenting as {currentUser.displayName}
+                      </p>
+                    ) : null}
+
                     <div className='mt-4 space-y-2'>
                       <textarea
                         className='w-full rounded-2xl border bg-stone-50 px-4 py-3'
@@ -646,8 +661,8 @@ export default function IssuesPage() {
                       <button
                         type='button'
                         className='rounded-full bg-stone-900 px-4 py-2 text-sm text-white disabled:bg-stone-400'
-                        onClick={() => handleCommentSubmit(issue.id, reporterId)}
-                        disabled={!reporterId}
+                        onClick={() => handleCommentSubmit(issue.id)}
+                        disabled={!currentUser}
                       >
                         Add comment
                       </button>

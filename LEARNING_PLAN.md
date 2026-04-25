@@ -97,7 +97,7 @@ Quiz:
 - auth architecture and security flow
 
 ### Phase 3: Better REST design and reusable frontend API layer
-Status: In progress
+Status: Completed
 
 Add:
 - pagination
@@ -120,11 +120,8 @@ Completed:
 - standardized backend error shape and frontend error parsing
 - typed paginated frontend API contracts for issues
 - initial comments backend/frontend workflow
-
-Remaining:
-- establish the TypeORM migration tooling and baseline migration strategy
-- apply migrations for new schema changes such as comments
-- finish the Phase 3 frontend issue experience with filters/pagination UI polish
+- TypeORM migration tooling and baseline migration strategy
+- Phase 3 frontend issue experience with filters/pagination UI polish
 
 Quiz:
 - API design, generics, pagination/filtering

@@ -13,7 +13,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/typeorm.config.ts migration:create",
+    "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create",
     "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/typeorm.config.ts migration:generate",
     "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/typeorm.config.ts migration:run",
     "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/database/typeorm.config.ts migration:revert"

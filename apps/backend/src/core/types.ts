@@ -28,4 +28,5 @@ export interface CurrentUser {
   id: string;
   email: string;
   role: UserRole;
+  displayName: string;
 }

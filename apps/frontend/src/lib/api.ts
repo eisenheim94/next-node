@@ -1,6 +1,13 @@
 import { clearAuthSession, getAccessToken, getRefreshToken, saveAuthSession } from '@/lib/auth';
 import type { AuthResponse, LoginInput, RegisterInput } from '@/types/auth';
-import type { CreateIssueInput, Issue } from '@/types/issue';
+import type { CreateCommentInput, Comment } from '@/types/comment';
+import type { ApiErrorResponse } from '@/types/api';
+import type {
+  CreateIssueInput,
+  GetIssuesParams,
+  Issue,
+  PaginatedIssues,
+} from '@/types/issue';
 import type { CreateProjectInput, Project } from '@/types/project';
 import type { User } from '@/types/user';
 
@@ -8,10 +15,38 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    let errorMessage = `Request failed with status ${response.status}`;
+
+    try {
+      const errorData = (await response.json()) as ApiErrorResponse;
+      const message = Array.isArray(errorData.message)
+        ? errorData.message.join(', ')
+        : errorData.message;
+
+      errorMessage = message || errorMessage;
+    } catch {
+      // Ignore JSON parsing errors and fall back to the status-based message.
+    }
+
+    throw new Error(errorMessage);
   }
 
   return (await response.json()) as T;
+}
+
+function buildQueryString(params: Record<string, string | number | undefined>): string {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === '') {
+      return;
+    }
+
+    searchParams.set(key, String(value));
+  });
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : '';
 }
 
 async function refreshAccessToken(): Promise<string | null> {
@@ -155,12 +190,27 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   return handleResponse<Project>(response);
 }
 
-export async function getIssues(): Promise<Issue[]> {
-  const response = await authenticatedFetch(`${API_URL}/issues`, {
+export async function getIssues(
+  params: GetIssuesParams = {},
+): Promise<PaginatedIssues> {
+  const queryString = buildQueryString({
+    page: params.page,
+    limit: params.limit,
+    status: params.status,
+    priority: params.priority,
+    projectId: params.projectId,
+    reporterId: params.reporterId,
+    assigneeId: params.assigneeId,
+    search: params.search,
+    sortBy: params.sortBy,
+    sortOrder: params.sortOrder,
+  });
+
+  const response = await authenticatedFetch(`${API_URL}/issues${queryString}`, {
     cache: 'no-store',
   });
 
-  return handleResponse<Issue[]>(response);
+  return handleResponse<PaginatedIssues>(response);
 }
 
 export async function createIssue(input: CreateIssueInput): Promise<Issue> {
@@ -173,4 +223,24 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
   });
 
   return handleResponse<Issue>(response);
+}
+
+export async function getCommentsByIssue(issueId: string): Promise<Comment[]> {
+  const response = await authenticatedFetch(`${API_URL}/comments/issue/${issueId}`, {
+    cache: 'no-store',
+  });
+
+  return handleResponse<Comment[]>(response);
+}
+
+export async function createComment(input: CreateCommentInput): Promise<Comment> {
+  const response = await authenticatedFetch(`${API_URL}/comments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  });
+
+  return handleResponse<Comment>(response);
 }

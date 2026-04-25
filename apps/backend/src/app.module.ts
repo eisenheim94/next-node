@@ -9,6 +9,9 @@ import { ProjectModule } from './projects/project.module';
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comments/comment.module';
+import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { getTypeOrmOptions } from './database/typeorm.config';
+
 
 @Module({
   imports: [
@@ -18,12 +21,18 @@ import { CommentModule } from './comments/comment.module';
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.getOrThrow<string>('DATABASE_URL'),
-        autoLoadEntities: true,
-        synchronize: false,
-      }),
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const baseOptions = getTypeOrmOptions(
+          configService.getOrThrow<string>('DATABASE_URL'),
+        );
+
+        return {
+          ...baseOptions,
+          autoLoadEntities: true,
+          entities: undefined,
+          migrations: undefined,
+        };
+      },
     }),
     AuthModule,
     UserModule,

@@ -97,6 +97,8 @@ Quiz:
 - auth architecture and security flow
 
 ### Phase 3: Better REST design and reusable frontend API layer
+Status: In progress
+
 Add:
 - pagination
 - filtering
@@ -104,12 +106,25 @@ Add:
 - comments
 - standardized errors
 - typed API client around `fetch`
+- TypeORM migrations setup for ongoing schema changes
 
 Focus:
 - generics
 - query DTOs
 - reusable request/response contracts
 - Swagger as API contract
+- migration workflow and schema evolution without `synchronize`
+
+Completed:
+- issue pagination, filtering, and sorting contracts
+- standardized backend error shape and frontend error parsing
+- typed paginated frontend API contracts for issues
+- initial comments backend/frontend workflow
+
+Remaining:
+- establish the TypeORM migration tooling and baseline migration strategy
+- apply migrations for new schema changes such as comments
+- finish the Phase 3 frontend issue experience with filters/pagination UI polish
 
 Quiz:
 - API design, generics, pagination/filtering

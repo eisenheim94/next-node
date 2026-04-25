@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from '@/types/api';
+
 export type IssueStatus = 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'DONE';
 export type IssuePriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
@@ -23,3 +25,27 @@ export interface CreateIssueInput {
   reporterId: string;
   assigneeId?: string;
 }
+
+export type IssueSortBy =
+  | 'createdAt'
+  | 'updatedAt'
+  | 'title'
+  | 'status'
+  | 'priority';
+
+export type SortOrder = 'ASC' | 'DESC';
+
+export interface GetIssuesParams {
+  page?: number;
+  limit?: number;
+  status?: IssueStatus;
+  priority?: IssuePriority;
+  projectId?: string;
+  reporterId?: string;
+  assigneeId?: string;
+  search?: string;
+  sortBy?: IssueSortBy;
+  sortOrder?: SortOrder;
+}
+
+export type PaginatedIssues = PaginatedResponse<Issue>;

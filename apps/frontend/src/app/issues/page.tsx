@@ -3,13 +3,33 @@
 import { useEffect, useState } from 'react';
 import { AuthGuard } from '@/components/auth-guard';
 
-import { createIssue, getIssues, getProjects, getUsers } from '@/lib/api';
-import type { Issue, IssuePriority, IssueStatus } from '@/types/issue';
+import {
+  createComment,
+  createIssue,
+  getCommentsByIssue,
+  getIssues,
+  getProjects,
+  getUsers,
+} from '@/lib/api';
+
+import type {
+  GetIssuesParams,
+  Issue,
+  IssuePriority,
+  IssueStatus,
+  PaginatedIssues,
+} from '@/types/issue';
+
+import type { Comment } from '@/types/comment';
+
 import type { Project } from '@/types/project';
 import type { User } from '@/types/user';
 
 export default function IssuesPage() {
-  const [issues, setIssues] = useState<Issue[]>([]);
+  const [issuesResponse, setIssuesResponse] = useState<PaginatedIssues | null>(null);
+  const [commentsByIssue, setCommentsByIssue] = useState<Record<string, Comment[]>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
@@ -20,42 +40,59 @@ export default function IssuesPage() {
   const [projectId, setProjectId] = useState('');
   const [reporterId, setReporterId] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
+  const [issueQuery, setIssueQuery] = useState<GetIssuesParams>({
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt',
+    sortOrder: 'DESC',
+  });
+
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [issuesData, projectsData, usersData] = await Promise.all([
-          getIssues(),
-          getProjects(),
-          getUsers(),
-        ]);
+  const loadData = async () => {
+    try {
+      const [issuesData, projectsData, usersData] = await Promise.all([
+        getIssues(issueQuery),
+        getProjects(),
+        getUsers(),
+      ]);
 
-        setIssues(issuesData);
-        setProjects(projectsData);
-        setUsers(usersData);
+      setIssuesResponse(issuesData);
+      setProjects(projectsData);
+      setUsers(usersData);
 
-        const firstProject = projectsData?.[0];
-        if (firstProject) {
-          setProjectId(firstProject.id);
-        }
+      const commentsEntries = await Promise.all(
+        issuesData.items.map(async (issue) => [
+          issue.id,
+          await getCommentsByIssue(issue.id),
+        ] as const),
+      );
 
-        const firstUser = usersData?.[0];
-        if (firstUser) {
-          setReporterId(firstUser.id);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load issues');
-      } finally {
-        setLoading(false);
+      setCommentsByIssue(Object.fromEntries(commentsEntries));
+
+
+      const firstProject = projectsData?.[0];
+      if (firstProject) {
+        setProjectId(firstProject.id);
       }
-    }
 
+      const firstUser = usersData?.[0];
+      if (firstUser) {
+        setReporterId(firstUser.id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load issues');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     void loadData();
-  }, []);
+  }, [issueQuery]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,7 +110,45 @@ export default function IssuesPage() {
         assigneeId: assigneeId || undefined,
       });
 
-      setIssues((current) => [newIssue, ...current]);
+      setIssuesResponse((current) => {
+        if (!current) {
+          return {
+            items: [newIssue],
+            meta: {
+              page: 1,
+              limit: 10,
+              totalItems: 1,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          };
+        }
+
+        const nextItems = [newIssue, ...current.items];
+        const totalItems = current.meta.totalItems + 1;
+        const totalPages = Math.max(
+          current.meta.totalPages,
+          Math.ceil(totalItems / current.meta.limit),
+        );
+
+        return {
+          items: nextItems.slice(0, current.meta.limit),
+          meta: {
+            ...current.meta,
+            totalItems,
+            totalPages,
+            hasNextPage: current.meta.page < totalPages,
+            hasPreviousPage: current.meta.page > 1,
+          },
+        };
+      });
+
+      setCommentsByIssue((current) => ({
+        ...current,
+        [newIssue.id]: [],
+      }));
+
       setTitle('');
       setDescription('');
       setStatus('BACKLOG');
@@ -86,7 +161,64 @@ export default function IssuesPage() {
     }
   }
 
+  async function handleCommentSubmit(issueId: string, authorId: string) {
+    const body = commentInputs[issueId]?.trim();
+
+    if (!body) {
+      return;
+    }
+
+    try {
+      const newComment = await createComment({
+        body,
+        issueId,
+        authorId,
+      });
+
+      setCommentsByIssue((current) => ({
+        ...current,
+        [issueId]: [...(current[issueId] ?? []), newComment],
+      }));
+
+      setCommentInputs((current) => ({
+        ...current,
+        [issueId]: '',
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create comment');
+    }
+  }
+
+  const issues = issuesResponse?.items ?? [];
+  const paginationMeta = issuesResponse?.meta ?? null;
   const canCreateIssue = projects.length > 0 && users.length > 0;
+
+  function goToPreviousPage() {
+    setIssueQuery((current) => ({
+      ...current,
+      page: Math.max(1, (current.page ?? 1) - 1),
+    }));
+  }
+
+  function goToNextPage() {
+    if (!paginationMeta?.hasNextPage) {
+      return;
+    }
+
+    setIssueQuery((current) => ({
+      ...current,
+      page: (current.page ?? 1) + 1,
+    }));
+  }
+
+  function handleLimitChange(limit: number) {
+    setIssueQuery((current) => ({
+      ...current,
+      page: 1,
+      limit,
+    }));
+  }
+
 
   return (
     <AuthGuard>
@@ -246,6 +378,50 @@ export default function IssuesPage() {
 
           <section className='rounded-3xl border bg-white p-8 shadow-sm'>
             <h2 className='text-2xl font-semibold text-stone-900'>Issue list</h2>
+            {paginationMeta ? (
+              <div className='mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+                <p className='text-sm text-stone-500'>
+                  Page {paginationMeta.page} of {paginationMeta.totalPages || 1} ·
+                  {` `}
+                  {paginationMeta.totalItems} total issues
+                </p>
+
+                <div className='flex flex-wrap items-center gap-3'>
+                  <label className='flex items-center gap-2 text-sm text-stone-600'>
+                    <span>Per page</span>
+                    <select
+                      className='rounded-xl border bg-stone-50 px-3 py-2'
+                      value={issueQuery.limit ?? 10}
+                      onChange={(event) => {
+                        handleLimitChange(Number(event.target.value));
+                      }}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                    </select>
+                  </label>
+
+                  <button
+                    type='button'
+                    className='rounded-full border px-4 py-2 text-sm text-stone-700 disabled:opacity-50'
+                    onClick={goToPreviousPage}
+                    disabled={!paginationMeta.hasPreviousPage}
+                  >
+                    Previous
+                  </button>
+
+                  <button
+                    type='button'
+                    className='rounded-full border px-4 py-2 text-sm text-stone-700 disabled:opacity-50'
+                    onClick={goToNextPage}
+                    disabled={!paginationMeta.hasNextPage}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             {loading ? <p className='mt-4 text-stone-600'>Loading...</p> : null}
 
@@ -280,6 +456,52 @@ export default function IssuesPage() {
                   <p className='text-sm text-stone-500'>
                     Assignee ID: {issue.assigneeId ?? 'Unassigned'}
                   </p>
+                  <div className='mt-4 rounded-2xl border bg-white p-4'>
+                    <h4 className='text-sm font-semibold text-stone-900'>
+                      Comments
+                    </h4>
+
+                    <div className='mt-3 space-y-3'>
+                      {(commentsByIssue[issue.id] ?? []).length === 0 ? (
+                        <p className='text-sm text-stone-500'>No comments yet.</p>
+                      ) : (
+                        (commentsByIssue[issue.id] ?? []).map((comment) => (
+                          <div
+                            key={comment.id}
+                            className='rounded-xl border bg-stone-50 px-3 py-2'
+                          >
+                            <p className='text-sm text-stone-800'>{comment.body}</p>
+                            <p className='mt-1 text-xs text-stone-500'>
+                              Author ID: {comment.authorId}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className='mt-4 space-y-2'>
+                      <textarea
+                        className='w-full rounded-2xl border bg-stone-50 px-4 py-3'
+                        value={commentInputs[issue.id] ?? ''}
+                        onChange={(event) =>
+                          setCommentInputs((current) => ({
+                            ...current,
+                            [issue.id]: event.target.value,
+                          }))
+                        }
+                        placeholder='Add a comment'
+                        rows={3}
+                      />
+                      <button
+                        type='button'
+                        className='rounded-full bg-stone-900 px-4 py-2 text-sm text-white disabled:bg-stone-400'
+                        onClick={() => handleCommentSubmit(issue.id, reporterId)}
+                        disabled={!reporterId}
+                      >
+                        Add comment
+                      </button>
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>

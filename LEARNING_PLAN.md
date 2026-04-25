@@ -21,7 +21,9 @@ We will start with plain `fetch`, move to stronger frontend state architecture l
 - Default learning mode: the learner writes all implementation code manually. The assistant should explain exactly what to write, where to write it, and why, but should not edit project files unless the learner explicitly asks for direct code changes.
 - Important: when the learner is expected to write a file, the assistant should show the full code for that file in chat. Do not give only summaries, pseudocode, or high-level implementation descriptions when the learner needs to type the file manually.
 - Code style rule for all teaching responses: always use single quotes in code examples unless the target language or syntax requires double quotes.
-- File instruction rule for all teaching responses: always show the exact file path for every file the learner needs to create or update before showing the code.
+- File instruction rule for all teaching responses: always show the file path for every file the learner needs to create or update before showing the code.
+- Path format rule for all teaching responses: always show repo-relative paths, not absolute filesystem paths.
+- Explanation rule for all teaching responses: for every file the learner creates or updates, explain what was added or changed, why it is needed, and how it works either immediately before or immediately after the file code.
 - Each phase should be covered as a complete implementation slice, not partially. If a phase needs backend, frontend, infrastructure, validation, or tests to be meaningfully usable, the teaching messages should cover the whole slice before moving on.
 - Do not jump from unfinished backend work to frontend implementation unless the message explicitly says the backend is still a prerequisite and names the missing files or routes.
 - Explanations should describe what to write, where to write it, how it works, and why the design is chosen.

@@ -8,10 +8,10 @@ import {
 } from '@/store/features/issues/issues-filters-slice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useIssuesPageData } from '@/features/issues/hooks/use-issues-page-data';
+import { PaginationControls } from '@/components/common/pagination-controls';
 import { IssueCard } from '@/components/entities/issues/issue-card';
 import { IssueCreateDialog } from '@/components/entities/issues/issue-create-dialog';
 import { IssueFiltersCard } from '@/components/entities/issues/issue-filters-card';
-import { IssuePagination } from '@/components/entities/issues/issue-pagination';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 export default function IssuesPage() {
@@ -83,10 +83,11 @@ export default function IssuesPage() {
         <IssueFiltersCard />
 
         {paginationMeta && (
-          <IssuePagination
+          <PaginationControls
+            itemLabel="issues"
             paginationMeta={paginationMeta}
             limit={issueFilters.limit}
-            limitId="issues-pagination-top"
+            pageSizeOptions={[6, 12, 24]}
             onLimitChange={handleLimitChange}
             onNextPage={handleNextPage}
             onPreviousPage={goToPreviousPage}
@@ -123,10 +124,11 @@ export default function IssuesPage() {
         </section>
 
         {paginationMeta && (
-          <IssuePagination
+          <PaginationControls
+            itemLabel="issues"
             paginationMeta={paginationMeta}
             limit={issueFilters.limit}
-            limitId="issues-pagination-bottom"
+            pageSizeOptions={[6, 12, 24]}
             onLimitChange={handleLimitChange}
             onNextPage={handleNextPage}
             onPreviousPage={goToPreviousPage}

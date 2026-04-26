@@ -1,5 +1,7 @@
 'use client';
 
+import { useId } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import {
@@ -10,39 +12,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { PaginatedIssues } from '@/types/issue';
+import type { PaginationMeta } from '@/types/api';
 
-interface IssuePaginationProps {
+interface PaginationControlsProps {
   className?: string;
+  itemLabel?: string;
   limit: number;
-  limitId: string;
-  paginationMeta: PaginatedIssues['meta'];
+  pageSizeOptions?: number[];
+  paginationMeta: PaginationMeta;
   onLimitChange: (limit: number) => void;
   onNextPage: () => void;
   onPreviousPage: () => void;
 }
 
-export function IssuePagination({
+export function PaginationControls({
   className,
+  itemLabel = 'items',
   limit,
-  limitId,
+  pageSizeOptions = [6, 12, 24],
   paginationMeta,
   onLimitChange,
   onNextPage,
   onPreviousPage,
-}: IssuePaginationProps) {
+}: PaginationControlsProps) {
+  const id = useId();
+  const limitId = `pagination-limit-${id}`;
+
   return (
     <section
-      className={[
+      className={cn(
         'flex flex-col gap-3 md:flex-row md:items-center md:justify-between',
         className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      )}
     >
       <p className="text-xs text-muted-foreground">
-        Page {paginationMeta.page} of {paginationMeta.totalPages || 1} ·{' '}
-        {paginationMeta.totalItems} total issues
+        Page {paginationMeta.page} of {paginationMeta.totalPages || 1}{' · '}
+        {paginationMeta.totalItems} total {itemLabel}
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -59,9 +64,14 @@ export function IssuePagination({
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="6">6</SelectItem>
-                <SelectItem value="12">12</SelectItem>
-                <SelectItem value="24">24</SelectItem>
+                {pageSizeOptions.map((pageSizeOption) => (
+                  <SelectItem
+                    key={pageSizeOption}
+                    value={String(pageSizeOption)}
+                  >
+                    {pageSizeOption}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>

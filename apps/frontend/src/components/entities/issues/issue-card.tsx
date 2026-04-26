@@ -84,7 +84,8 @@ export function IssueCard({
               {canDelete ? (
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="ghost"
+                  className="text-red-600 hover:bg-red-100 hover:text-red-600"
                   size="sm"
                   disabled={isDeleting}
                   onClick={() => {

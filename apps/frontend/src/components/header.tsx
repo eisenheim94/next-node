@@ -49,7 +49,10 @@ export function Header() {
           <Link href="/" className="font-heading font-bold">
             tracker
           </Link>
-          <Separator orientation="vertical" className="h-5" />
+          <Separator
+            orientation="vertical"
+            className="h-5 data-[orientation=vertical]:!self-center"
+          />
           <nav className="flex items-center gap-1">
             {NAV_ITEMS.map((item) => {
               const isActive =
@@ -92,7 +95,8 @@ export function Header() {
 
               <Button
                 type="button"
-                variant="destructive"
+                variant="ghost"
+                className="text-red-600"
                 onClick={() => {
                   void handleLogout();
                 }}

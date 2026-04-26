@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { PlusIcon } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 
 import { createIssue } from '@/lib/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -104,12 +105,20 @@ export function IssueCreateDialog({
         assigneeId: assigneeId || undefined,
       };
 
-      await createIssue(input);
+      const issue = await createIssue(input);
       setOpen(false);
       resetForm();
+      toast.success('Issue created', {
+        description: `"${issue.title}" was added to ${issue.project.name}.`,
+      });
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create issue');
+      const message = err instanceof Error ? err.message : 'Failed to create issue';
+
+      setError(message);
+      toast.error('Issue creation failed', {
+        description: message,
+      });
     } finally {
       setSubmitting(false);
     }

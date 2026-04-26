@@ -143,3 +143,22 @@ body {
     cursor: pointer;
   }
 }
+
+.toaster {
+  --normal-bg: var(--popover);
+  --normal-text: var(--popover-foreground);
+  --normal-border: var(--border);
+  --success-bg: oklch(0.64 0.2 150);
+  --success-text: oklch(0.98 0.01 150);
+  --success-border: oklch(0.56 0.18 150);
+  --error-bg: oklch(0.58 0.24 27.33);
+  --error-text: oklch(0.98 0.01 25);
+  --error-border: oklch(0.5 0.21 27);
+  --warning-bg: oklch(0.78 0.16 85);
+  --warning-text: oklch(0.24 0.02 85);
+  --warning-border: oklch(0.72 0.15 85);
+  --info-bg: oklch(0.63 0.14 230);
+  --info-text: oklch(0.98 0.01 230);
+  --info-border: oklch(0.57 0.13 230);
+  --border-radius: var(--radius);
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { deleteProject, getMe, getProjects } from '@/lib/api';
 import { ProjectCard } from '@/components/entities/projects/project-card';
@@ -45,7 +46,13 @@ export default function ProjectsPage() {
     : 'Project creation is temporarily unavailable.';
 
   async function handleProjectDelete(projectId: string) {
-    if (!window.confirm('Delete this project?')) {
+    const projectName = projects.find((project) => project.id === projectId)?.name;
+
+    if (
+      !window.confirm(
+        'Delete this project? All related issues and comments will be deleted too.',
+      )
+    ) {
       return;
     }
 
@@ -55,8 +62,19 @@ export default function ProjectsPage() {
       await deleteProject(projectId);
       setProjects((current) => current.filter((project) => project.id !== projectId));
       setError(null);
+      toast.success('Project deleted', {
+        description: projectName
+          ? `"${projectName}" and its related issues/comments were removed.`
+          : 'The project and its related issues/comments were removed.',
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete project');
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete project';
+
+      setError(message);
+      toast.error('Project deletion failed', {
+        description: message,
+      });
     } finally {
       setDeletingProjectId(null);
     }

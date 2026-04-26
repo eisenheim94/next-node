@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { AuthUser } from '@/types/auth';
+import { toast } from 'sonner';
 
 import {
   deleteIssue,
@@ -169,7 +170,13 @@ export default function IssuesPage() {
   }
 
   async function handleIssueDelete(issueId: string) {
-    if (!window.confirm('Delete this issue?')) {
+    const issueTitle = issues.find((issue) => issue.id === issueId)?.title;
+
+    if (
+      !window.confirm(
+        'Delete this issue? All comments on this issue will also be deleted.',
+      )
+    ) {
       return;
     }
 
@@ -192,8 +199,18 @@ export default function IssuesPage() {
         };
       });
       setError(null);
+      toast.success('Issue deleted', {
+        description: issueTitle
+          ? `"${issueTitle}" and all of its comments were removed.`
+          : 'The issue and all of its comments were removed.',
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete issue');
+      const message = err instanceof Error ? err.message : 'Failed to delete issue';
+
+      setError(message);
+      toast.error('Issue deletion failed', {
+        description: message,
+      });
     } finally {
       setDeletingIssueId(null);
     }

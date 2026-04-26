@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 
 import { createProject } from '@/lib/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -42,7 +43,7 @@ export function ProjectCreateDialog({
     setError(null);
 
     try {
-      await createProject({
+      const project = await createProject({
         name,
         description: description.trim() ? description : undefined,
       });
@@ -50,9 +51,18 @@ export function ProjectCreateDialog({
       setName('');
       setDescription('');
       setOpen(false);
+      toast.success('Project created', {
+        description: `"${project.name}" is ready for new issues.`,
+      });
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create project');
+      const message =
+        err instanceof Error ? err.message : 'Failed to create project';
+
+      setError(message);
+      toast.error('Project creation failed', {
+        description: message,
+      });
     } finally {
       setSubmitting(false);
     }

@@ -44,9 +44,9 @@ export class UserEntity {
   @OneToMany(() => CommentEntity, (comment) => comment.author)
   comments!: CommentEntity[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

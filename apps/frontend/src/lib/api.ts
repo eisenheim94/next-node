@@ -31,7 +31,17 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new Error(errorMessage);
   }
 
-  return (await response.json()) as T;
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const responseText = await response.text();
+
+  if (!responseText.trim()) {
+    return undefined as T;
+  }
+
+  return JSON.parse(responseText) as T;
 }
 
 function buildQueryString(params: Record<string, string | number | undefined>): string {
@@ -190,6 +200,14 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
   return handleResponse<Project>(response);
 }
 
+export async function deleteProject(id: string): Promise<void> {
+  const response = await authenticatedFetch(`${API_URL}/projects/${id}`, {
+    method: 'DELETE',
+  });
+
+  return handleResponse<void>(response);
+}
+
 export async function getIssues(
   params: GetIssuesParams = {},
 ): Promise<PaginatedIssues> {
@@ -225,6 +243,14 @@ export async function createIssue(input: CreateIssueInput): Promise<Issue> {
   return handleResponse<Issue>(response);
 }
 
+export async function deleteIssue(id: string): Promise<void> {
+  const response = await authenticatedFetch(`${API_URL}/issues/${id}`, {
+    method: 'DELETE',
+  });
+
+  return handleResponse<void>(response);
+}
+
 export async function getCommentsByIssue(issueId: string): Promise<Comment[]> {
   const response = await authenticatedFetch(`${API_URL}/comments/issue/${issueId}`, {
     cache: 'no-store',
@@ -243,4 +269,12 @@ export async function createComment(input: CreateCommentInput): Promise<Comment>
   });
 
   return handleResponse<Comment>(response);
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  const response = await authenticatedFetch(`${API_URL}/users/${id}`, {
+    method: 'DELETE',
+  });
+
+  return handleResponse<void>(response);
 }

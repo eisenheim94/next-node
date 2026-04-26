@@ -101,15 +101,17 @@ export class IssueEntity {
   @OneToMany(() => CommentEntity, (comment) => comment.issue)
   comments!: CommentEntity[];
 
+  commentCount?: number;
+
   @ApiProperty({
     example: '2026-04-25T10:15:30.000Z',
   })
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
   @ApiProperty({
     example: '2026-04-25T11:45:12.000Z',
   })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

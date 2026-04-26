@@ -21,23 +21,28 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
 import { IssueEntity } from './entities/issue.entity';
 import { IssueService } from './issue.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiErrorResponseDto } from 'src/auth/dto/api-error-response.dto';
+import { UserRole } from 'src/core/types';
 import { PaginatedIssuesResponseDto } from './dto/paginated-issues-response.dto';
 import { ListIssuesQueryDto } from './dto/list-issues-query.dto';
+import { IssueResponseDto } from './dto/issue-response.dto';
 
 @ApiTags('issues')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('issues')
 export class IssueController {
   constructor(private readonly issueService: IssueService) { }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiCreatedResponse({ type: IssueEntity })
   @ApiBadRequestResponse({ type: ApiErrorResponseDto })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
@@ -57,11 +62,12 @@ export class IssueController {
   @Get(':id')
   @ApiOkResponse({ type: IssueEntity })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
-  findOne(@Param('id') id: string): Promise<IssueEntity> {
+  findOne(@Param('id') id: string): Promise<IssueResponseDto> {
     return this.issueService.findOne(id);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOkResponse({ type: IssueEntity })
   @ApiBadRequestResponse({ type: ApiErrorResponseDto })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
@@ -73,6 +79,7 @@ export class IssueController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiNoContentResponse()
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })

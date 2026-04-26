@@ -20,7 +20,7 @@ This repository follows the learning workflow defined in `LEARNING_PLAN.md`.
 - Show repo-relative file paths before each file block.
 - Default to line-level fixes for existing files: identify the exact file, what to find, what to replace or insert, and why. Only provide full file contents when the learner explicitly asks for a full file or when a brand-new file is being created.
 - When the learner is expected to type code manually, do not summarize or provide pseudocode in place of real code.
-- Use single quotes in code examples unless the language or syntax requires double quotes.
+- Use single quotes in code examples, but use double quotes for JSX attributes.
 - For every file, explain what changed, why it is needed, and how it works.
 - Present files in dependency order so imported prerequisites appear first.
 - Never show a file before the files it imports have already been introduced in the same teaching response, unless the import already exists in the repo.

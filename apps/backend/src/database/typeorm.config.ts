@@ -54,17 +54,17 @@ function getRequiredEnv(name: string): string {
 export function getTypeOrmOptions(
   databaseUrl = getRequiredEnv('DATABASE_URL'),
 ): DataSourceOptions {
+  const isTsRuntime = __filename.endsWith('.ts');
+
   return {
     type: 'postgres',
     url: databaseUrl,
-    entities: [
-      join(process.cwd(), 'src', '**', '*.entity.ts'),
-      join(process.cwd(), 'dist', '**', '*.entity.js'),
-    ],
-    migrations: [
-      join(process.cwd(), 'src', 'database', 'migrations', '*.ts'),
-      join(process.cwd(), 'dist', 'database', 'migrations', '*.js'),
-    ],
+    entities: isTsRuntime
+      ? [join(process.cwd(), 'src', '**', '*.entity.ts')]
+      : [join(process.cwd(), 'dist', '**', '*.entity.js')],
+    migrations: isTsRuntime
+      ? [join(process.cwd(), 'src', 'database', 'migrations', '*.ts')]
+      : [join(process.cwd(), 'dist', 'database', 'migrations', '*.js')],
     migrationsTableName: 'typeorm_migrations',
     synchronize: false,
   };

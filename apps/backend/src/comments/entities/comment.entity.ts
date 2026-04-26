@@ -54,12 +54,12 @@ export class CommentEntity {
   @ApiProperty({
     example: '2026-04-25T12:30:00.000Z',
   })
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt!: Date;
 
   @ApiProperty({
     example: '2026-04-25T12:30:00.000Z',
   })
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt!: Date;
 }

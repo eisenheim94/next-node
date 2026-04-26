@@ -23,7 +23,7 @@ export default tseslint.config(
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
       quotes: ['error', 'single', { avoidEscape: true }],
-      'jsx-quotes': ['error', 'prefer-single'],
+      'jsx-quotes': ['error', 'prefer-double'],
     },
   },
   {

@@ -20,7 +20,7 @@ We will start with plain `fetch`, move to stronger frontend state architecture l
 ## Teaching Workflow
 - Default learning mode: the learner writes all implementation code manually. The assistant should explain exactly what to write, where to write it, and why, but should not edit project files unless the learner explicitly asks for direct code changes.
 - Important: when the learner is expected to write a file, the assistant should show the full code for that file in chat. Do not give only summaries, pseudocode, or high-level implementation descriptions when the learner needs to type the file manually.
-- Code style rule for all teaching responses: always use single quotes in code examples unless the target language or syntax requires double quotes.
+- Code style rule for all teaching responses: use single quotes in code examples, but use double quotes for JSX attributes.
 - File instruction rule for all teaching responses: always show the file path for every file the learner needs to create or update before showing the code.
 - Path format rule for all teaching responses: always show repo-relative paths, not absolute filesystem paths.
 - Explanation rule for all teaching responses: for every file the learner creates or updates, explain what was added or changed, why it is needed, and how it works either immediately before or immediately after the file code.
@@ -137,6 +137,10 @@ Focus:
 - slice design
 - typed action payloads
 - server state vs client state
+
+Completed:
+- shadcn/ui refactor for `projects`, `issues`, and `users` pages with modal-based create flows for the existing project/issue actions
+- responsive entity card-grid layout for the main protected CRUD pages
 
 Quiz:
 - when to use TanStack Query vs Redux

@@ -1,4 +1,6 @@
 import type { PaginatedResponse } from '@/types/api';
+import type { Project } from '@/types/project';
+import type { User } from '@/types/user';
 
 export type IssueStatus = 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'DONE';
 export type IssuePriority = 'LOW' | 'MEDIUM' | 'HIGH';
@@ -12,6 +14,10 @@ export interface Issue {
   projectId: string;
   reporterId: string;
   assigneeId: string | null;
+  project: Project;
+  reporter: User;
+  assignee: User | null;
+  commentCount: number;
   createdAt: string;
   updatedAt: string;
 }

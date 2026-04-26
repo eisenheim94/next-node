@@ -9,6 +9,8 @@ import { UpdateIssueDto } from './dto/update-issue.dto';
 import { IssueEntity } from './entities/issue.entity';
 import { IssueSortBy, ListIssuesQueryDto } from './dto/list-issues-query.dto';
 import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
+import { IssueResponseDto } from './dto/issue-response.dto';
+import { PaginatedIssuesResponseDto } from './dto/paginated-issues-response.dto';
 
 @Injectable()
 export class IssueService {
@@ -80,13 +82,17 @@ export class IssueService {
   }
 
   async remove(id: string): Promise<void> {
-    const issue = await this.findOne(id);
+    const issue = await this.findOneEntity(id);
     await this.issuesRepository.remove(issue);
   }
 
-  async findAll(query: ListIssuesQueryDto): Promise<PaginatedResponse<IssueEntity>> {
+  async findAll(query: ListIssuesQueryDto): Promise<PaginatedIssuesResponseDto> {
     const queryBuilder = this.issuesRepository
       .createQueryBuilder('issue')
+      .leftJoinAndSelect('issue.project', 'project')
+      .leftJoinAndSelect('issue.reporter', 'reporter')
+      .leftJoinAndSelect('issue.assignee', 'assignee')
+      .loadRelationCountAndMap('issue.commentCount', 'issue.comments')
       .orderBy(
         `issue.${this.mapSortBy(query.sortBy)}`,
         query.sortOrder,
@@ -137,7 +143,7 @@ export class IssueService {
     const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / query.limit);
 
     return {
-      items,
+      items: items.map((issue) => this.mapIssueToResponse(issue)),
       meta: {
         page: query.page,
         limit: query.limit,
@@ -149,9 +155,14 @@ export class IssueService {
     };
   }
 
-  async findOne(id: string): Promise<IssueEntity> {
+  private async findOneEntity(id: string): Promise<IssueEntity> {
     const issue = await this.issuesRepository.findOne({
       where: { id },
+      relations: {
+        project: true,
+        reporter: true,
+        assignee: true,
+      },
     });
 
     if (!issue) {
@@ -159,6 +170,23 @@ export class IssueService {
     }
 
     return issue;
+  }
+
+  async findOne(id: string): Promise<IssueResponseDto> {
+    const issue = await this.issuesRepository
+      .createQueryBuilder('issue')
+      .leftJoinAndSelect('issue.project', 'project')
+      .leftJoinAndSelect('issue.reporter', 'reporter')
+      .leftJoinAndSelect('issue.assignee', 'assignee')
+      .loadRelationCountAndMap('issue.commentCount', 'issue.comments')
+      .where('issue.id = :id', { id })
+      .getOne();
+
+    if (!issue) {
+      throw new NotFoundException(`Issue with id "${id}" was not found`)
+    }
+
+    return this.mapIssueToResponse(issue);
   }
 
   private mapSortBy(sortBy: IssueSortBy): string {
@@ -196,4 +224,40 @@ export class IssueService {
       throw new NotFoundException(`${label} with id "${userId}" was not found`);
     }
   }
+
+  private mapIssueToResponse(issue: IssueEntity): IssueResponseDto {
+    return {
+      id: issue.id,
+      title: issue.title,
+      description: issue.description,
+      status: issue.status,
+      priority: issue.priority,
+      projectId: issue.projectId,
+      reporterId: issue.reporterId,
+      assigneeId: issue.assigneeId,
+      project: {
+        id: issue.project.id,
+        name: issue.project.name,
+        description: issue.project.description,
+      },
+      reporter: {
+        id: issue.reporter.id,
+        email: issue.reporter.email,
+        displayName: issue.reporter.displayName,
+        role: issue.reporter.role,
+      },
+      assignee: issue.assignee
+        ? {
+          id: issue.assignee.id,
+          email: issue.assignee.email,
+          displayName: issue.assignee.displayName,
+          role: issue.assignee.role,
+        }
+        : null,
+      commentCount: issue.commentCount ?? 0,
+      createdAt: issue.createdAt,
+      updatedAt: issue.updatedAt,
+    };
+  }
+
 }

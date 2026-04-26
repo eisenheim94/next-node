@@ -2,6 +2,7 @@ export type AppEnvironment = 'development' | 'test' | 'production';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
   MEMBER = 'MEMBER',
 }
 

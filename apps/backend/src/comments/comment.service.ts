@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { IssueEntity } from 'src/issues/entities/issue.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentResponseDto } from './dto/comment-response.dto';
 
 @Injectable()
 export class CommentService {
@@ -17,7 +18,7 @@ export class CommentService {
     private readonly usersRepository: Repository<UserEntity>,
   ) { }
 
-  async create(createCommentDto: CreateCommentDto): Promise<CommentEntity> {
+  async create(createCommentDto: CreateCommentDto): Promise<CommentResponseDto> {
     await this.ensureIssueExists(createCommentDto.issueId);
     await this.ensureUserExists(createCommentDto.authorId);
 
@@ -27,16 +28,24 @@ export class CommentService {
       authorId: createCommentDto.authorId,
     });
 
-    return this.commentsRepository.save(comment);
+    const savedComment = await this.commentsRepository.save(comment);
+    const commentWithAuthor = await this.findCommentWithAuthor(savedComment.id);
+
+    return this.mapCommentToResponse(commentWithAuthor);
   }
 
-  async findAllByIssue(issueId: string): Promise<CommentEntity[]> {
+  async findAllByIssue(issueId: string): Promise<CommentResponseDto[]> {
     await this.ensureIssueExists(issueId);
 
-    return this.commentsRepository.find({
+    const comments = await this.commentsRepository.find({
       where: { issueId },
+      relations: {
+        author: true,
+      },
       order: { createdAt: 'DESC' },
     });
+
+    return comments.map((comment) => this.mapCommentToResponse(comment));
   }
 
   async ensureIssueExists(id: string) {
@@ -57,5 +66,37 @@ export class CommentService {
     if (!user) {
       throw new NotFoundException(`User with id ${id} was not found`);
     }
+  }
+
+  private async findCommentWithAuthor(id: string): Promise<CommentEntity> {
+    const comment = await this.commentsRepository.findOne({
+      where: { id },
+      relations: {
+        author: true,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with id ${id} was not found`);
+    }
+
+    return comment;
+  }
+
+  private mapCommentToResponse(comment: CommentEntity): CommentResponseDto {
+    return {
+      id: comment.id,
+      body: comment.body,
+      issueId: comment.issueId,
+      authorId: comment.authorId,
+      author: {
+        id: comment.author.id,
+        email: comment.author.email,
+        displayName: comment.author.displayName,
+        role: comment.author.role,
+      },
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    };
   }
 }

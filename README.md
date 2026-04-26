@@ -1,6 +1,6 @@
 # Issue Tracker Learning Project
 
-This repository is a personal learning project for building a Node.js backend from scratch with the stack defined in [LEARNING_PLAN.md](/Users/demyd/Claude/next-node-3/LEARNING_PLAN.md), while also refreshing my Next.js and Redux knowledge in practice.
+This repository is a personal learning project for building a Node.js backend from scratch with the stack defined in [LEARNING_PLAN.md](LEARNING_PLAN.md), while also refreshing my Next.js and Redux knowledge in practice.
 
 About 95% of the code in this project is written manually by me. AI is used mainly to help define the learning path, suggest the next steps, and provide example implementations of how specific pieces can be written.
 
@@ -102,4 +102,4 @@ Some UX features already implemented in the project:
 
 ## Learning Plan
 
-The detailed roadmap and progress tracking live in [LEARNING_PLAN.md](/Users/demyd/Claude/next-node-3/LEARNING_PLAN.md).
+The detailed roadmap and progress tracking live in [LEARNING_PLAN.md](LEARNING_PLAN.md).

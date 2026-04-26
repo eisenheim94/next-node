@@ -4,8 +4,9 @@ import './globals.css';
 import { JetBrains_Mono } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
+import { AppProviders } from '@/components/providers/app-providers';
 
-const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata: Metadata = {
   title: 'Issue Tracker Learning Project',
@@ -20,8 +21,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn('font-mono', jetbrainsMono.variable)}>
       <body className="antialiased">
-        {children}
-        <Toaster position="top-right" closeButton />
+        <AppProviders>
+          {children}
+          <Toaster position="top-right" closeButton />
+        </AppProviders>
       </body>
     </html>
   );

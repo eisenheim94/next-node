@@ -1,9 +1,10 @@
 'use client';
 
-import type { FormEvent } from 'react';
-
 import { FadersHorizontalIcon } from '@phosphor-icons/react';
+import { XIcon } from 'lucide-react';
 
+import { useIssuesFilters } from '@/features/issues/hooks/use-issues-filters';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -24,27 +25,56 @@ import {
 } from '@/components/ui/select';
 import type { GetIssuesParams } from '@/types/issue';
 
-interface IssueFiltersCardProps {
-  issueQuery: GetIssuesParams;
-  searchInput: string;
-  setSearchInput: (value: string) => void;
-  onClearSearch: () => void;
-  onPriorityFilterChange: (value: string) => void;
-  onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onSortChange: (value: string) => void;
-  onStatusFilterChange: (value: string) => void;
+function getSortLabel(issueQuery: GetIssuesParams) {
+  const value = `${issueQuery.sortBy ?? 'createdAt'}:${issueQuery.sortOrder ?? 'DESC'}`;
+
+  switch (value) {
+    case 'createdAt:DESC':
+      return 'Newest first';
+    case 'createdAt:ASC':
+      return 'Oldest first';
+    case 'updatedAt:DESC':
+      return 'Recently updated';
+    case 'title:ASC':
+      return 'Title A-Z';
+    case 'priority:DESC':
+      return 'Priority high-low';
+    case 'status:ASC':
+      return 'Status A-Z';
+    default:
+      return value;
+  }
 }
 
-export function IssueFiltersCard({
-  issueQuery,
-  searchInput,
-  setSearchInput,
-  onClearSearch,
-  onPriorityFilterChange,
-  onSearchSubmit,
-  onSortChange,
-  onStatusFilterChange,
-}: IssueFiltersCardProps) {
+function isDefaultSort(issueQuery: GetIssuesParams) {
+  return (
+    (issueQuery.sortBy ?? 'createdAt') === 'createdAt' &&
+    (issueQuery.sortOrder ?? 'DESC') === 'DESC'
+  );
+}
+
+export function IssueFiltersCard() {
+  const {
+    issueFilters,
+    issueQuery,
+    handleClearPriority,
+    handleClearSearch,
+    handleClearStatus,
+    handlePriorityFilterChange,
+    handleResetSort,
+    handleSearchInputChange,
+    handleSearchSubmit,
+    handleSortChange,
+    handleStatusFilterChange,
+  } = useIssuesFilters();
+
+  const searchInput = issueFilters.searchInput;
+  const hasActiveBadges =
+    Boolean(issueQuery.search) ||
+    Boolean(issueQuery.status) ||
+    Boolean(issueQuery.priority) ||
+    !isDefaultSort(issueQuery);
+
   return (
     <Card>
       <CardHeader>
@@ -59,14 +89,14 @@ export function IssueFiltersCard({
       <CardContent className="flex flex-col gap-5">
         <form
           className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5"
-          onSubmit={onSearchSubmit}
+          onSubmit={handleSearchSubmit}
         >
           <Field className="xl:col-span-2">
             <FieldLabel htmlFor="issue-search">Search</FieldLabel>
             <Input
               id="issue-search"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) => handleSearchInputChange(event.target.value)}
               placeholder="Search title or description"
             />
           </Field>
@@ -75,9 +105,7 @@ export function IssueFiltersCard({
             <FieldLabel>Status</FieldLabel>
             <Select
               value={issueQuery.status ?? 'all'}
-              onValueChange={(value) => {
-                onStatusFilterChange(value === 'all' ? '' : value);
-              }}
+              onValueChange={(value) => handleStatusFilterChange(value === 'all' ? '' : value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -98,9 +126,7 @@ export function IssueFiltersCard({
             <FieldLabel>Priority</FieldLabel>
             <Select
               value={issueQuery.priority ?? 'all'}
-              onValueChange={(value) => {
-                onPriorityFilterChange(value === 'all' ? '' : value);
-              }}
+              onValueChange={(value) => handlePriorityFilterChange(value === 'all' ? '' : value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -120,7 +146,7 @@ export function IssueFiltersCard({
             <FieldLabel>Sort</FieldLabel>
             <Select
               value={`${issueQuery.sortBy ?? 'createdAt'}:${issueQuery.sortOrder ?? 'DESC'}`}
-              onValueChange={onSortChange}
+              onValueChange={handleSortChange}
             >
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -140,19 +166,70 @@ export function IssueFiltersCard({
 
           <div className="flex flex-wrap items-end gap-3 xl:col-span-5">
             <Button type="submit">Apply search</Button>
-            <Button type="button" variant="outline" onClick={onClearSearch}>
+            <Button type="button" variant="outline" onClick={handleClearSearch}>
               Clear search
             </Button>
           </div>
         </form>
 
-        {issueQuery.search || issueQuery.status || issueQuery.priority ? (
-          <p className="text-xs text-muted-foreground">
-            Active filters:
-            {issueQuery.search ? ` search="${issueQuery.search}"` : ''}
-            {issueQuery.status ? ` status=${issueQuery.status}` : ''}
-            {issueQuery.priority ? ` priority=${issueQuery.priority}` : ''}
-          </p>
+        {hasActiveBadges ? (
+          <div className="flex flex-wrap gap-2">
+            {issueQuery.search ? (
+              <Badge variant="secondary" className="gap-1 pe-1 normal-case tracking-normal">
+                <span>Search: {issueQuery.search}</span>
+                <button
+                  type="button"
+                  aria-label="Remove search filter"
+                  className="inline-flex size-4 items-center justify-center rounded-sm hover:bg-black/10"
+                  onClick={handleClearSearch}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
+            ) : null}
+
+            {issueQuery.status ? (
+              <Badge variant="secondary" className="gap-1 pe-1 normal-case tracking-normal">
+                <span>Status: {issueQuery.status}</span>
+                <button
+                  type="button"
+                  aria-label="Remove status filter"
+                  className="inline-flex size-4 items-center justify-center rounded-sm hover:bg-black/10"
+                  onClick={handleClearStatus}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
+            ) : null}
+
+            {issueQuery.priority ? (
+              <Badge variant="secondary" className="gap-1 pe-1 normal-case tracking-normal">
+                <span>Priority: {issueQuery.priority}</span>
+                <button
+                  type="button"
+                  aria-label="Remove priority filter"
+                  className="inline-flex size-4 items-center justify-center rounded-sm hover:bg-black/10"
+                  onClick={handleClearPriority}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
+            ) : null}
+
+            {!isDefaultSort(issueQuery) ? (
+              <Badge variant="secondary" className="gap-1 pe-1 normal-case tracking-normal">
+                <span>Sort: {getSortLabel(issueQuery)}</span>
+                <button
+                  type="button"
+                  aria-label="Reset sort"
+                  className="inline-flex size-4 items-center justify-center rounded-sm hover:bg-black/10"
+                  onClick={handleResetSort}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              </Badge>
+            ) : null}
+          </div>
         ) : null}
       </CardContent>
     </Card>

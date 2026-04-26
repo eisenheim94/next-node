@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
-import { createIssue } from '@/lib/api';
+import { useCreateIssueMutation } from '@/features/issues/api/use-issues';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,9 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import type { AuthUser } from '@/types/auth';
-import type { CreateIssueInput, IssuePriority, IssueStatus } from '@/types/issue';
+import type { IssuePriority, IssueStatus } from '@/types/issue';
 import type { Project } from '@/types/project';
 import type { User } from '@/types/user';
 
@@ -36,7 +37,6 @@ interface IssueCreateDialogProps {
   canCreateIssue: boolean;
   creationUnavailableMessage: string;
   currentUser: AuthUser | null;
-  onCreated: () => void;
   projects: Project[];
   users: User[];
 }
@@ -45,10 +45,11 @@ export function IssueCreateDialog({
   canCreateIssue,
   creationUnavailableMessage,
   currentUser,
-  onCreated,
   projects,
   users,
 }: IssueCreateDialogProps) {
+  const createIssueMutation = useCreateIssueMutation();
+
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -57,7 +58,6 @@ export function IssueCreateDialog({
   const [projectId, setProjectId] = useState('');
   const [reporterId, setReporterId] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -91,11 +91,10 @@ export function IssueCreateDialog({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
     setError(null);
 
     try {
-      const input: CreateIssueInput = {
+      const issue = await createIssueMutation.mutateAsync({
         title,
         description: description.trim() ? description : undefined,
         status,
@@ -103,15 +102,14 @@ export function IssueCreateDialog({
         projectId,
         reporterId,
         assigneeId: assigneeId || undefined,
-      };
+      });
 
-      const issue = await createIssue(input);
       setOpen(false);
       resetForm();
+
       toast.success('Issue created', {
         description: `"${issue.title}" was added to ${issue.project.name}.`,
       });
-      onCreated();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create issue';
 
@@ -119,8 +117,6 @@ export function IssueCreateDialog({
       toast.error('Issue creation failed', {
         description: message,
       });
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -151,17 +147,13 @@ export function IssueCreateDialog({
         {!canCreateIssue ? (
           <Alert>
             <AlertTitle>Creation is currently unavailable</AlertTitle>
-            <AlertDescription>
-              {creationUnavailableMessage}
-            </AlertDescription>
+            <AlertDescription>{creationUnavailableMessage}</AlertDescription>
           </Alert>
         ) : null}
 
         <form
           className="flex flex-col gap-5"
-          onSubmit={(event) => {
-            void handleSubmit(event);
-          }}
+          onSubmit={handleSubmit}
         >
           <FieldGroup>
             <Field>
@@ -173,7 +165,7 @@ export function IssueCreateDialog({
                 placeholder="Fix broken dashboard filter"
                 required
                 maxLength={160}
-                disabled={!canCreateIssue}
+                disabled={!canCreateIssue || createIssueMutation.isPending}
               />
             </Field>
 
@@ -184,7 +176,7 @@ export function IssueCreateDialog({
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={4}
-                disabled={!canCreateIssue}
+                disabled={!canCreateIssue || createIssueMutation.isPending}
               />
             </Field>
 
@@ -196,7 +188,7 @@ export function IssueCreateDialog({
                   onValueChange={(value) => {
                     setStatus(value as IssueStatus);
                   }}
-                  disabled={!canCreateIssue}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select status" />
@@ -219,7 +211,7 @@ export function IssueCreateDialog({
                   onValueChange={(value) => {
                     setPriority(value as IssuePriority);
                   }}
-                  disabled={!canCreateIssue}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select priority" />
@@ -237,10 +229,10 @@ export function IssueCreateDialog({
 
             <Field>
               <FieldLabel>Project</FieldLabel>
-                <Select
-                  value={projectId}
-                  onValueChange={setProjectId}
-                disabled={!canCreateIssue}
+              <Select
+                value={projectId}
+                onValueChange={setProjectId}
+                disabled={!canCreateIssue || createIssueMutation.isPending}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select project" />
@@ -263,7 +255,7 @@ export function IssueCreateDialog({
                 <Select
                   value={reporterId}
                   onValueChange={setReporterId}
-                  disabled={!canCreateIssue}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select reporter" />
@@ -287,7 +279,7 @@ export function IssueCreateDialog({
                   onValueChange={(value) => {
                     setAssigneeId(value === 'unassigned' ? '' : value);
                   }}
-                  disabled={!canCreateIssue}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select assignee" />
@@ -315,8 +307,12 @@ export function IssueCreateDialog({
           ) : null}
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={submitting || !canCreateIssue}>
-              {submitting ? 'Creating...' : 'Create issue'}
+            <Button
+              type="submit"
+              disabled={!canCreateIssue || createIssueMutation.isPending}
+            >
+              {createIssueMutation.isPending ? <Spinner className="me-2" /> : null}
+              {createIssueMutation.isPending ? 'Creating...' : 'Create issue'}
             </Button>
           </div>
         </form>

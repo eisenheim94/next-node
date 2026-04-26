@@ -32,7 +32,7 @@ interface IssueCardProps {
   currentUser: AuthUser | null;
   isDeleting: boolean;
   issue: Issue;
-  onDelete: (issueId: string) => void;
+  onDelete: (issueId: string) => void | Promise<void>;
 }
 
 export function IssueCard({
@@ -88,9 +88,7 @@ export function IssueCard({
                   className="text-red-600 hover:bg-red-100 hover:text-red-600"
                   size="sm"
                   disabled={isDeleting}
-                  onClick={() => {
-                    void onDelete(issue.id);
-                  }}
+                  onClick={() => onDelete(issue.id)}
                 >
                   <Trash2Icon />
                   {isDeleting ? 'Deleting...' : 'Delete'}

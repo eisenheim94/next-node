@@ -1,44 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { clearAuthSession } from '@/lib/auth';
-import { deleteUser, getMe, getUsers } from '@/lib/api';
+import { useCurrentUserQuery } from '@/features/shared/api/use-session';
+import { useDeleteUserMutation, useUsersQuery } from '@/features/users/api/use-users';
 import { UserCard } from '@/components/entities/users/user-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { AuthUser } from '@/types/auth';
-import type { User } from '@/types/user';
 import { isAdminUserRole } from '@/types/user';
 
 export default function UsersPage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadUsers() {
-      try {
-        const [usersData, currentUserData] = await Promise.all([
-          getUsers(),
-          getMe(),
-        ]);
+  const usersQuery = useUsersQuery();
+  const currentUserQuery = useCurrentUserQuery();
+  const deleteUserMutation = useDeleteUserMutation();
 
-        setUsers(usersData);
-        setCurrentUser(currentUserData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load users');
-      } finally {
-        setLoading(false);
-      }
-    }
+  const users = usersQuery.data ?? [];
+  const currentUser = currentUserQuery.data ?? null;
 
-    void loadUsers();
-  }, []);
+  const loading = usersQuery.isLoading || currentUserQuery.isLoading;
+
+  const errorMessage =
+    usersQuery.error instanceof Error
+      ? usersQuery.error.message
+      : currentUserQuery.error instanceof Error
+        ? currentUserQuery.error.message
+        : null;
 
   const canDeleteUsers = currentUser ? isAdminUserRole(currentUser.role) : false;
 
@@ -53,23 +42,15 @@ export default function UsersPage() {
       return;
     }
 
-    setDeletingUserId(userId);
-
     try {
-      await deleteUser(userId);
+      await deleteUserMutation.mutateAsync(userId);
 
       if (isDeletingCurrentUser) {
         clearAuthSession();
         router.replace('/login');
-        return;
       }
-
-      setUsers((current) => current.filter((user) => user.id !== userId));
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete user');
-    } finally {
-      setDeletingUserId(null);
+      console.error(err);
     }
   }
 
@@ -87,14 +68,14 @@ export default function UsersPage() {
 
         {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
 
-        {error ? (
+        {errorMessage ? (
           <Alert variant="destructive">
             <AlertTitle>Could not load users</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         ) : null}
 
-        {!loading && !error && users.length === 0 ? (
+        {!loading && !errorMessage && users.length === 0 ? (
           <Card>
             <CardHeader>
               <CardTitle>No users found</CardTitle>
@@ -110,10 +91,11 @@ export default function UsersPage() {
             <UserCard
               key={user.id}
               canDelete={canDeleteUsers}
-              isDeleting={deletingUserId === user.id}
-              onDelete={(userId) => {
-                void handleUserDelete(userId);
-              }}
+              isDeleting={
+                deleteUserMutation.isPending &&
+                deleteUserMutation.variables === user.id
+              }
+              onDelete={handleUserDelete}
               user={user}
             />
           ))}

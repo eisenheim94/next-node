@@ -19,18 +19,19 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useCreateProjectMutation } from '@/features/projects/api/use-projects';
 
 interface ProjectCreateDialogProps {
   canCreateProject: boolean;
   creationUnavailableMessage: string;
-  onCreated: () => void;
 }
 
 export function ProjectCreateDialog({
   canCreateProject,
   creationUnavailableMessage,
-  onCreated,
 }: ProjectCreateDialogProps) {
+  const createProjectMutation = useCreateProjectMutation();
+
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -43,7 +44,7 @@ export function ProjectCreateDialog({
     setError(null);
 
     try {
-      const project = await createProject({
+      const project = await createProjectMutation.mutateAsync({
         name,
         description: description.trim() ? description : undefined,
       });
@@ -54,7 +55,6 @@ export function ProjectCreateDialog({
       toast.success('Project created', {
         description: `"${project.name}" is ready for new issues.`,
       });
-      onCreated();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to create project';
@@ -101,9 +101,7 @@ export function ProjectCreateDialog({
 
         <form
           className="flex flex-col gap-5"
-          onSubmit={(event) => {
-            void handleSubmit(event);
-          }}
+          onSubmit={handleSubmit}
         >
           <FieldGroup>
             <Field>

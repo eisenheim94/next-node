@@ -43,10 +43,10 @@ export class IssueController {
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiCreatedResponse({ type: IssueEntity })
+  @ApiCreatedResponse({ type: IssueResponseDto })
   @ApiBadRequestResponse({ type: ApiErrorResponseDto })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
-  create(@Body() createIssueDto: CreateIssueDto): Promise<IssueEntity> {
+  create(@Body() createIssueDto: CreateIssueDto): Promise<IssueResponseDto> {
     return this.issueService.create(createIssueDto);
   }
 
@@ -60,7 +60,7 @@ export class IssueController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: IssueEntity })
+  @ApiOkResponse({ type: IssueResponseDto })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
   findOne(@Param('id') id: string): Promise<IssueResponseDto> {
     return this.issueService.findOne(id);
@@ -68,13 +68,13 @@ export class IssueController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOkResponse({ type: IssueEntity })
+  @ApiOkResponse({ type: IssueResponseDto })
   @ApiBadRequestResponse({ type: ApiErrorResponseDto })
   @ApiNotFoundResponse({ type: ApiErrorResponseDto })
   update(
     @Param('id') id: string,
     @Body() updateIssueDto: UpdateIssueDto,
-  ): Promise<IssueEntity> {
+  ): Promise<IssueResponseDto> {
     return this.issueService.update(id, updateIssueDto);
   }
 

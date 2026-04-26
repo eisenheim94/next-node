@@ -23,17 +23,17 @@ export default function HomePage() {
           <Link
             href="/users"
           >
-            <Card className="transition hover:-translate-y-0.5">
+            <Card className="h-full transition hover:-translate-y-0.5">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Users
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col h-full">
                 <p className="text-stone-700 mb-2">
-                  Admin-only user management and lookup.
+                  List of users, visible only to manager and admin.
                 </p>
-                <Button className="w-full">View Users</Button>
+                <Button className="w-full mt-auto">View Users</Button>
               </CardContent>
             </Card>
           </Link>
@@ -41,17 +41,17 @@ export default function HomePage() {
           <Link
             href="/projects"
           >
-            <Card className="transition hover:-translate-y-0.5">
+            <Card className="h-full transition hover:-translate-y-0.5">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Projects
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col h-full">
                 <p className="text-stone-700 mb-2">
                   Create projects and view the current list.
                 </p>
-                <Button className="w-full">View Projects</Button>
+                <Button className="w-full mt-auto">View Projects</Button>
               </CardContent>
             </Card>
           </Link>
@@ -59,17 +59,17 @@ export default function HomePage() {
           <Link
             href="/issues"
           >
-            <Card className="transition hover:-translate-y-0.5">
+            <Card className="h-full transition hover:-translate-y-0.5">
               <CardHeader>
                 <CardTitle className="text-lg">
                   Issues
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col h-full">
                 <p className="text-stone-700 mb-2">
                   Create issues and view the current list.
                 </p>
-                <Button className="w-full">View Issues</Button>
+                <Button className="w-full mt-auto">View Issues</Button>
               </CardContent>
             </Card>
           </Link>

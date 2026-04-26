@@ -15,7 +15,7 @@ import type { Project } from '@/types/project';
 interface ProjectCardProps {
   canDelete: boolean;
   isDeleting: boolean;
-  onDelete: (projectId: string) => void;
+  onDelete: (projectId: string) => void | Promise<void>;
   project: Project;
 }
 
@@ -43,9 +43,7 @@ export function ProjectCard({
               className="text-red-600 hover:bg-red-100 hover:text-red-600"
               size="sm"
               disabled={isDeleting}
-              onClick={() => {
-                void onDelete(project.id);
-              }}
+              onClick={() => onDelete(project.id)}
             >
               <Trash2Icon />
               {isDeleting ? 'Deleting...' : 'Delete'}

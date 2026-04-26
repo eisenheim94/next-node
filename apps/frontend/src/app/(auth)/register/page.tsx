@@ -88,9 +88,7 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <form
-              onSubmit={(event) => {
-                void handleSubmit(event);
-              }}
+              onSubmit={handleSubmit}
             >
               <FieldGroup>
                 <AuthTextField

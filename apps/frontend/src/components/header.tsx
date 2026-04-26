@@ -97,9 +97,7 @@ export function Header() {
                 type="button"
                 variant="ghost"
                 className="text-red-600"
-                onClick={() => {
-                  void handleLogout();
-                }}
+                onClick={handleLogout}
                 disabled={loggingOut}
               >
                 <LogOut />

@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react';
 
 import { ChatCircleDotsIcon } from '@phosphor-icons/react';
 
-import { createComment, getCommentsByIssue } from '@/lib/api';
+import {
+  useCommentsByIssueQuery,
+  useCreateCommentMutation,
+} from '@/features/issues/api/use-issues';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import type { AuthUser } from '@/types/auth';
-import type { Comment } from '@/types/comment';
 import { IssueCommentItem } from './issue-comment-item';
 
 interface IssueCommentsProps {
@@ -26,53 +28,17 @@ export function IssueComments({
   issueId,
   onCommentCountChange,
 }: IssueCommentsProps) {
-  const [comments, setComments] = useState<Comment[]>([]);
+  const commentsQuery = useCommentsByIssueQuery(issueId, enabled);
+  const createCommentMutation = useCreateCommentMutation(issueId);
+
   const [commentInput, setCommentInput] = useState('');
   const [commentError, setCommentError] = useState<string | null>(null);
-  const [commentsLoaded, setCommentsLoaded] = useState(false);
-  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
-  const [isCommentSubmitting, setIsCommentSubmitting] = useState(false);
+
+  const comments = commentsQuery.data ?? [];
 
   useEffect(() => {
-    if (!enabled || commentsLoaded) {
-      return;
-    }
-
-    let isMounted = true;
-
-    async function loadComments() {
-      setIsCommentsLoading(true);
-      setCommentError(null);
-
-      try {
-        const commentsData = await getCommentsByIssue(issueId);
-
-        if (!isMounted) {
-          return;
-        }
-
-        setComments(commentsData);
-        setCommentsLoaded(true);
-        onCommentCountChange?.(commentsData.length);
-      } catch (err) {
-        if (!isMounted) {
-          return;
-        }
-
-        setCommentError(err instanceof Error ? err.message : 'Failed to load comments');
-      } finally {
-        if (isMounted) {
-          setIsCommentsLoading(false);
-        }
-      }
-    }
-
-    void loadComments();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [commentsLoaded, enabled, issueId, onCommentCountChange]);
+    onCommentCountChange?.(comments.length);
+  }, [comments.length, onCommentCountChange]);
 
   useEffect(() => {
     if (!enabled) {
@@ -92,27 +58,18 @@ export function IssueComments({
       return;
     }
 
-    setIsCommentSubmitting(true);
     setCommentError(null);
 
     try {
-      const newComment = await createComment({
+      await createCommentMutation.mutateAsync({
         body,
         issueId,
         authorId: currentUser.id,
       });
 
-      setComments((current) => {
-        const nextComments = [newComment, ...current];
-        onCommentCountChange?.(nextComments.length);
-        return nextComments;
-      });
       setCommentInput('');
-      setCommentsLoaded(true);
     } catch (err) {
       setCommentError(err instanceof Error ? err.message : 'Failed to create comment');
-    } finally {
-      setIsCommentSubmitting(false);
     }
   }
 
@@ -130,6 +87,13 @@ export function IssueComments({
         </Alert>
       ) : null}
 
+      {commentsQuery.error instanceof Error ? (
+        <Alert variant="destructive">
+          <AlertTitle>Could not load comments</AlertTitle>
+          <AlertDescription>{commentsQuery.error.message}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {currentUser ? (
         <div className="flex flex-col gap-2 border p-3">
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -140,22 +104,20 @@ export function IssueComments({
             onChange={(event) => setCommentInput(event.target.value)}
             placeholder="Add a comment"
             rows={3}
-            disabled={isCommentsLoading || isCommentSubmitting}
+            disabled={commentsQuery.isLoading || createCommentMutation.isPending}
           />
           <div className="flex justify-end">
             <Button
               type="button"
-              onClick={() => {
-                void handleCommentSubmit();
-              }}
+              onClick={handleCommentSubmit}
               disabled={
                 !currentUser ||
                 !commentInput.trim() ||
-                isCommentsLoading ||
-                isCommentSubmitting
+                commentsQuery.isLoading ||
+                createCommentMutation.isPending
               }
             >
-              {isCommentSubmitting ? <Spinner className="me-2" /> : null}
+              {createCommentMutation.isPending ? <Spinner className="me-2" /> : null}
               Add comment
             </Button>
           </div>
@@ -163,7 +125,7 @@ export function IssueComments({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        {isCommentsLoading ? (
+        {commentsQuery.isLoading ? (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Spinner />
             <span>Loading comments...</span>

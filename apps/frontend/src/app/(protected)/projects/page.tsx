@@ -1,44 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteProject, getMe, getProjects } from '@/lib/api';
+import {
+  useDeleteProjectMutation,
+  useProjectsQuery,
+} from '@/features/projects/api/use-projects';
+import { useCurrentUserQuery } from '@/features/shared/api/use-session';
+
 import { ProjectCard } from '@/components/entities/projects/project-card';
 import { ProjectCreateDialog } from '@/components/entities/projects/project-create-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { AuthUser } from '@/types/auth';
-import type { Project } from '@/types/project';
 import { isElevatedUserRole } from '@/types/user';
 
 export default function ProjectsPage() {
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const projectsQuery = useProjectsQuery();
+  const currentUserQuery = useCurrentUserQuery();
+  const deleteProjectMutation = useDeleteProjectMutation();
 
-  async function loadProjects() {
-    try {
-      const [projectsData, currentUserData] = await Promise.all([
-        getProjects(),
-        getMe(),
-      ]);
+  const projects = projectsQuery.data ?? [];
+  const currentUser = currentUserQuery.data ?? null;
 
-      setProjects(projectsData);
-      setCurrentUser(currentUserData);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load projects');
-    } finally {
-      setLoading(false);
-    }
-  }
+  const errorMessage =
+    projectsQuery.error instanceof Error
+      ? projectsQuery.error.message
+      : currentUserQuery.error instanceof Error
+        ? currentUserQuery.error.message
+        : null;
 
-  useEffect(() => {
-    void loadProjects();
-  }, []);
+  const loading = projectsQuery.isLoading || currentUserQuery.isLoading;
 
   const canManageProjects = currentUser ? isElevatedUserRole(currentUser.role) : false;
   const projectCreationUnavailableMessage = currentUser && !canManageProjects
@@ -56,12 +47,9 @@ export default function ProjectsPage() {
       return;
     }
 
-    setDeletingProjectId(projectId);
-
     try {
-      await deleteProject(projectId);
-      setProjects((current) => current.filter((project) => project.id !== projectId));
-      setError(null);
+      await deleteProjectMutation.mutateAsync(projectId);
+
       toast.success('Project deleted', {
         description: projectName
           ? `"${projectName}" and its related issues/comments were removed.`
@@ -71,12 +59,9 @@ export default function ProjectsPage() {
       const message =
         err instanceof Error ? err.message : 'Failed to delete project';
 
-      setError(message);
       toast.error('Project deletion failed', {
         description: message,
       });
-    } finally {
-      setDeletingProjectId(null);
     }
   }
 
@@ -96,17 +81,13 @@ export default function ProjectsPage() {
           <ProjectCreateDialog
             canCreateProject={canManageProjects}
             creationUnavailableMessage={projectCreationUnavailableMessage}
-            onCreated={() => {
-              setLoading(true);
-              void loadProjects();
-            }}
           />
         </section>
 
-        {error ? (
+        {errorMessage ? (
           <Alert variant="destructive">
             <AlertTitle>Could not load projects</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -128,10 +109,8 @@ export default function ProjectsPage() {
             <ProjectCard
               key={project.id}
               canDelete={canManageProjects}
-              isDeleting={deletingProjectId === project.id}
-              onDelete={(projectId) => {
-                void handleProjectDelete(projectId);
-              }}
+              isDeleting={deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id}
+              onDelete={handleProjectDelete}
               project={project}
             />
           ))}

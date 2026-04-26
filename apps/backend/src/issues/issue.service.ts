@@ -23,7 +23,7 @@ export class IssueService {
     private readonly usersRepositry: Repository<UserEntity>,
   ) { }
 
-  async create(createIssueDto: CreateIssueDto): Promise<IssueEntity> {
+  async create(createIssueDto: CreateIssueDto): Promise<IssueResponseDto> {
     await this.ensureProjectExists(createIssueDto.projectId);
     await this.ensureUserExists(createIssueDto.reporterId, 'Reporter');
 
@@ -41,10 +41,13 @@ export class IssueService {
       assigneeId: createIssueDto.assigneeId ?? null,
     });
 
-    return this.issuesRepository.save(issue);
+    const savedIssue = await this.issuesRepository.save(issue);
+
+    return this.findOne(savedIssue.id);
   }
 
-  async update(id: string, updateIssueDto: UpdateIssueDto): Promise<IssueEntity> {
+
+  async update(id: string, updateIssueDto: UpdateIssueDto): Promise<IssueResponseDto> {
     const issue = await this.findOne(id);
 
     if (updateIssueDto.projectId !== undefined) {
@@ -78,7 +81,9 @@ export class IssueService {
       issue.priority = updateIssueDto.priority;
     }
 
-    return this.issuesRepository.save(issue);
+    await this.issuesRepository.save(issue);
+
+    return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {

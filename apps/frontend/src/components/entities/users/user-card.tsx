@@ -17,7 +17,7 @@ import { UserRoleBadge } from './user-role-badge';
 interface UserCardProps {
   canDelete: boolean;
   isDeleting: boolean;
-  onDelete: (userId: string) => void;
+  onDelete: (userId: string) => void | Promise<void>;
   user: User;
 }
 
@@ -54,9 +54,7 @@ export function UserCard({
                 className="text-red-600 hover:bg-red-100 hover:text-red-600"
                 size="sm"
                 disabled={isDeleting}
-                onClick={() => {
-                  void onDelete(user.id);
-                }}
+                onClick={() => onDelete(user.id)}
               >
                 <Trash2Icon />
                 {isDeleting ? 'Deleting...' : 'Delete'}

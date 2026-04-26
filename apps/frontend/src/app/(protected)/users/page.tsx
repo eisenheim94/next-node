@@ -6,9 +6,12 @@ import { clearAuthSession } from '@/lib/auth';
 import { useCurrentUserQuery } from '@/features/shared/api/use-session';
 import { useDeleteUserMutation, useUsersQuery } from '@/features/users/api/use-users';
 import { UserCard } from '@/components/entities/users/user-card';
+import { UserCardSkeleton } from '@/components/entities/users/user-card-skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { isAdminUserRole } from '@/types/user';
+
+const USER_SKELETON_COUNT = 6;
 
 export default function UsersPage() {
   const router = useRouter();
@@ -66,7 +69,13 @@ export default function UsersPage() {
           </p>
         </section>
 
-        {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
+        {loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: USER_SKELETON_COUNT }, (_, index) => (
+              <UserCardSkeleton key={index} />
+            ))}
+          </section>
+        ) : null}
 
         {errorMessage ? (
           <Alert variant="destructive">
@@ -86,20 +95,22 @@ export default function UsersPage() {
           </Card>
         ) : null}
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {users.map((user) => (
-            <UserCard
-              key={user.id}
-              canDelete={canDeleteUsers}
-              isDeleting={
-                deleteUserMutation.isPending &&
-                deleteUserMutation.variables === user.id
-              }
-              onDelete={handleUserDelete}
-              user={user}
-            />
-          ))}
-        </section>
+        {!loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {users.map((user) => (
+              <UserCard
+                key={user.id}
+                canDelete={canDeleteUsers}
+                isDeleting={
+                  deleteUserMutation.isPending &&
+                  deleteUserMutation.variables === user.id
+                }
+                onDelete={handleUserDelete}
+                user={user}
+              />
+            ))}
+          </section>
+        ) : null}
       </div>
     </main>
   );

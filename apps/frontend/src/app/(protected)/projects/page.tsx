@@ -9,10 +9,13 @@ import {
 import { useCurrentUserQuery } from '@/features/shared/api/use-session';
 
 import { ProjectCard } from '@/components/entities/projects/project-card';
+import { ProjectCardSkeleton } from '@/components/entities/projects/project-card-skeleton';
 import { ProjectCreateDialog } from '@/components/entities/projects/project-create-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { isElevatedUserRole } from '@/types/user';
+
+const PROJECT_SKELETON_COUNT = 6;
 
 export default function ProjectsPage() {
   const projectsQuery = useProjectsQuery();
@@ -91,7 +94,13 @@ export default function ProjectsPage() {
           </Alert>
         ) : null}
 
-        {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
+        {loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: PROJECT_SKELETON_COUNT }, (_, index) => (
+              <ProjectCardSkeleton key={index} />
+            ))}
+          </section>
+        ) : null}
 
         {!loading && projects.length === 0 ? (
           <Card>
@@ -104,17 +113,19 @@ export default function ProjectsPage() {
           </Card>
         ) : null}
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              canDelete={canManageProjects}
-              isDeleting={deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id}
-              onDelete={handleProjectDelete}
-              project={project}
-            />
-          ))}
-        </section>
+        {!loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                canDelete={canManageProjects}
+                isDeleting={deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id}
+                onDelete={handleProjectDelete}
+                project={project}
+              />
+            ))}
+          </section>
+        ) : null}
       </div>
     </main>
   );

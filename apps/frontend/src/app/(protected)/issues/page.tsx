@@ -10,10 +10,13 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useIssuesPageData } from '@/features/issues/hooks/use-issues-page-data';
 import { PaginationControls } from '@/components/common/pagination-controls';
 import { IssueCard } from '@/components/entities/issues/issue-card';
+import { IssueCardSkeleton } from '@/components/entities/issues/issue-card-skeleton';
 import { IssueCreateDialog } from '@/components/entities/issues/issue-create-dialog';
 import { IssueFiltersCard } from '@/components/entities/issues/issue-filters-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+const ISSUE_SKELETON_COUNT = 6;
 export default function IssuesPage() {
   const dispatch = useAppDispatch();
   const issueQuery = useAppSelector(selectIssuesQueryParams);
@@ -94,7 +97,13 @@ export default function IssuesPage() {
           />
         )}
 
-        {loading ? <p className="text-sm text-muted-foreground">Loading...</p> : null}
+        {loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: ISSUE_SKELETON_COUNT }, (_, index) => (
+              <IssueCardSkeleton key={index} />
+            ))}
+          </section>
+        ) : null}
 
         {!loading && issues.length === 0 && (
           <Card>
@@ -107,21 +116,23 @@ export default function IssuesPage() {
           </Card>
         )}
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {issues.map((issue) => (
-            <IssueCard
-              key={issue.id}
-              canDelete={canManageIssues}
-              currentUser={currentUser}
-              isDeleting={
-                deleteIssueMutation.isPending &&
-                deleteIssueMutation.variables === issue.id
-              }
-              issue={issue}
-              onDelete={handleIssueDelete}
-            />
-          ))}
-        </section>
+        {!loading ? (
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {issues.map((issue) => (
+              <IssueCard
+                key={issue.id}
+                canDelete={canManageIssues}
+                currentUser={currentUser}
+                isDeleting={
+                  deleteIssueMutation.isPending &&
+                  deleteIssueMutation.variables === issue.id
+                }
+                issue={issue}
+                onDelete={handleIssueDelete}
+              />
+            ))}
+          </section>
+        ) : null}
 
         {paginationMeta && (
           <PaginationControls

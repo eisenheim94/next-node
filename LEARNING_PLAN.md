@@ -141,6 +141,7 @@ Focus:
 Completed:
 - shadcn/ui refactor for `projects`, `issues`, and `users` pages with modal-based create flows for the existing project/issue actions
 - responsive entity card-grid layout for the main protected CRUD pages
+- skeleton loading states for the `issues`, `projects`, and `users` list pages
 
 Quiz:
 - when to use TanStack Query vs Redux

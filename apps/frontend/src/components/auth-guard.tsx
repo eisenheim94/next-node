@@ -39,7 +39,7 @@ export function AuthGuard({
     return (
       <main className="flex min-h-screen items-center justify-center px-6">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex text-6xl font-bold tracking-tight text-stone-900 font-heading">
+          <div className="flex text-6xl font-bold tracking-tight text-stone-900">
             {letters.map((letter, index) => (
               <motion.span
                 key={`${letter}-${index}`}

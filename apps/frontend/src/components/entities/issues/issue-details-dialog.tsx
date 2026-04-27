@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  DialogBody,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -25,12 +26,12 @@ export function IssueDetailsDialog({
   onCommentCountChange,
 }: IssueDetailsDialogProps) {
   return (
-    <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl gap-0">
-      <DialogHeader className="border-solid border-b-1 border-foreground pb-4">
+    <DialogContent className="sm:max-w-2xl">
+      <DialogHeader>
         <DialogTitle>{issue.title}</DialogTitle>
       </DialogHeader>
 
-      <div className="flex flex-col gap-6 overflow-y-auto pt-3">
+      <DialogBody className="gap-6 pt-3">
         <div className="flex flex-wrap gap-2">
           <IssueStatusBadge status={issue.status} />
           <IssuePriorityBadge priority={issue.priority} />
@@ -58,7 +59,7 @@ export function IssueDetailsDialog({
           issueId={issue.id}
           onCommentCountChange={onCommentCountChange}
         />
-      </div>
+      </DialogBody>
     </DialogContent>
   );
 }

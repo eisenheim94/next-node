@@ -60,7 +60,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 flex w-[min(100%-2rem,36rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-4 border bg-background p-5 shadow-lg duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:p-6',
+          'fixed top-1/2 left-1/2 z-50 flex max-h-[85vh] w-[min(100%-2rem,36rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border bg-background p-5 shadow-lg duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 [&_[data-slot=dialog-header]]:pr-9 sm:p-6',
           className
         )}
         {...props}
@@ -83,7 +83,17 @@ function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn('flex flex-col gap-1 text-left', className)}
+      className={cn('shrink-0 border-b border-foreground pb-4 text-left', className)}
+      {...props}
+    />
+  )
+}
+
+function DialogBody({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="dialog-body"
+      className={cn('flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pt-4', className)}
       {...props}
     />
   )
@@ -128,6 +138,7 @@ function DialogDescription({
 export {
   Dialog,
   DialogClose,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,

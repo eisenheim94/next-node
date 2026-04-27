@@ -9,6 +9,7 @@ import { useCreateIssueMutation } from '@/features/issues/api/use-issues';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
+  DialogBody,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -136,7 +137,7 @@ export function IssueCreateDialog({
           Create new issue
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create new issue</DialogTitle>
           <DialogDescription>
@@ -144,178 +145,182 @@ export function IssueCreateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {!canCreateIssue ? (
-          <Alert>
-            <AlertTitle>Creation is currently unavailable</AlertTitle>
-            <AlertDescription>{creationUnavailableMessage}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <form
-          className="flex flex-col gap-5"
-          onSubmit={handleSubmit}
-        >
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="issue-title">Title</FieldLabel>
-              <Input
-                id="issue-title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Fix broken dashboard filter"
-                required
-                maxLength={160}
-                disabled={!canCreateIssue || createIssueMutation.isPending}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="issue-description">Description</FieldLabel>
-              <Textarea
-                id="issue-description"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={4}
-                disabled={!canCreateIssue || createIssueMutation.isPending}
-              />
-            </Field>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <Field>
-                <FieldLabel>Status</FieldLabel>
-                <Select
-                  value={status}
-                  onValueChange={(value) => {
-                    setStatus(value as IssueStatus);
-                  }}
-                  disabled={!canCreateIssue || createIssueMutation.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="BACKLOG">BACKLOG</SelectItem>
-                      <SelectItem value="TODO">TODO</SelectItem>
-                      <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
-                      <SelectItem value="DONE">DONE</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-
-              <Field>
-                <FieldLabel>Priority</FieldLabel>
-                <Select
-                  value={priority}
-                  onValueChange={(value) => {
-                    setPriority(value as IssuePriority);
-                  }}
-                  disabled={!canCreateIssue || createIssueMutation.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="LOW">LOW</SelectItem>
-                      <SelectItem value="MEDIUM">MEDIUM</SelectItem>
-                      <SelectItem value="HIGH">HIGH</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-
-            <Field>
-              <FieldLabel>Project</FieldLabel>
-              <Select
-                value={projectId}
-                onValueChange={setProjectId}
-                disabled={!canCreateIssue || createIssueMutation.isPending}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select project" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <Field>
-                <FieldLabel>Reporter</FieldLabel>
-                <Select
-                  value={reporterId}
-                  onValueChange={setReporterId}
-                  disabled={!canCreateIssue || createIssueMutation.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select reporter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-
-              <Field>
-                <FieldLabel>Assignee</FieldLabel>
-                <Select
-                  value={assigneeId || 'unassigned'}
-                  onValueChange={(value) => {
-                    setAssigneeId(value === 'unassigned' ? '' : value);
-                  }}
-                  disabled={!canCreateIssue || createIssueMutation.isPending}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select assignee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="unassigned">Unassigned</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-            </div>
-          </FieldGroup>
-
-          {error ? (
-            <Alert variant="destructive">
-              <AlertTitle>Could not create issue</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+        <DialogBody>
+          {!canCreateIssue ? (
+            <Alert>
+              <AlertTitle>Creation is currently unavailable</AlertTitle>
+              <AlertDescription>{creationUnavailableMessage}</AlertDescription>
             </Alert>
           ) : null}
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={!canCreateIssue || createIssueMutation.isPending}
-            >
-              {createIssueMutation.isPending ? <Spinner className="me-2" /> : null}
-              {createIssueMutation.isPending ? 'Creating...' : 'Create issue'}
-            </Button>
-          </div>
-        </form>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={(event) => {
+              void handleSubmit(event);
+            }}
+          >
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="issue-title">Title</FieldLabel>
+                <Input
+                  id="issue-title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Fix broken dashboard filter"
+                  required
+                  maxLength={160}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="issue-description">Description</FieldLabel>
+                <Textarea
+                  id="issue-description"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  rows={4}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
+                />
+              </Field>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field>
+                  <FieldLabel>Status</FieldLabel>
+                  <Select
+                    value={status}
+                    onValueChange={(value) => {
+                      setStatus(value as IssueStatus);
+                    }}
+                    disabled={!canCreateIssue || createIssueMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="BACKLOG">BACKLOG</SelectItem>
+                        <SelectItem value="TODO">TODO</SelectItem>
+                        <SelectItem value="IN_PROGRESS">IN_PROGRESS</SelectItem>
+                        <SelectItem value="DONE">DONE</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field>
+                  <FieldLabel>Priority</FieldLabel>
+                  <Select
+                    value={priority}
+                    onValueChange={(value) => {
+                      setPriority(value as IssuePriority);
+                    }}
+                    disabled={!canCreateIssue || createIssueMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="LOW">LOW</SelectItem>
+                        <SelectItem value="MEDIUM">MEDIUM</SelectItem>
+                        <SelectItem value="HIGH">HIGH</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+
+              <Field>
+                <FieldLabel>Project</FieldLabel>
+                <Select
+                  value={projectId}
+                  onValueChange={setProjectId}
+                  disabled={!canCreateIssue || createIssueMutation.isPending}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field>
+                  <FieldLabel>Reporter</FieldLabel>
+                  <Select
+                    value={reporterId}
+                    onValueChange={setReporterId}
+                    disabled={!canCreateIssue || createIssueMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select reporter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field>
+                  <FieldLabel>Assignee</FieldLabel>
+                  <Select
+                    value={assigneeId || 'unassigned'}
+                    onValueChange={(value) => {
+                      setAssigneeId(value === 'unassigned' ? '' : value);
+                    }}
+                    disabled={!canCreateIssue || createIssueMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select assignee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </FieldGroup>
+
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>Could not create issue</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={!canCreateIssue || createIssueMutation.isPending}
+              >
+                {createIssueMutation.isPending ? <Spinner className="me-2" /> : null}
+                {createIssueMutation.isPending ? 'Creating...' : 'Create issue'}
+              </Button>
+            </div>
+          </form>
+        </DialogBody>
       </DialogContent>
     </Dialog>
   );

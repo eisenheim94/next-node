@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { PlusIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
-import { createProject } from '@/lib/api';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
+  DialogBody,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -92,58 +92,62 @@ export function ProjectCreateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {!canCreateProject ? (
-          <Alert>
-            <AlertTitle>Creation is currently unavailable</AlertTitle>
-            <AlertDescription>{creationUnavailableMessage}</AlertDescription>
-          </Alert>
-        ) : null}
-
-        <form
-          className="flex flex-col gap-5"
-          onSubmit={handleSubmit}
-        >
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="project-name">Name</FieldLabel>
-              <Input
-                id="project-name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Website redesign"
-                required
-                maxLength={120}
-                disabled={!canCreateProject || submitting}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="project-description">Description</FieldLabel>
-              <Textarea
-                id="project-description"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Short project description"
-                rows={4}
-                disabled={!canCreateProject || submitting}
-              />
-            </Field>
-          </FieldGroup>
-
-          {error ? (
-            <Alert variant="destructive">
-              <AlertTitle>Could not create project</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+        <DialogBody>
+          {!canCreateProject ? (
+            <Alert>
+              <AlertTitle>Creation is currently unavailable</AlertTitle>
+              <AlertDescription>{creationUnavailableMessage}</AlertDescription>
             </Alert>
           ) : null}
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={!canCreateProject || submitting}>
-              {submitting && <Spinner className="me-2" />}
-              {submitting ? 'Creating...' : 'Create project'}
-            </Button>
-          </div>
-        </form>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={(event) => {
+              void handleSubmit(event);
+            }}
+          >
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="project-name">Name</FieldLabel>
+                <Input
+                  id="project-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Website redesign"
+                  required
+                  maxLength={120}
+                  disabled={!canCreateProject || submitting}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="project-description">Description</FieldLabel>
+                <Textarea
+                  id="project-description"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Short project description"
+                  rows={4}
+                  disabled={!canCreateProject || submitting}
+                />
+              </Field>
+            </FieldGroup>
+
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>Could not create project</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={!canCreateProject || submitting}>
+                {submitting && <Spinner className="me-2" />}
+                {submitting ? 'Creating...' : 'Create project'}
+              </Button>
+            </div>
+          </form>
+        </DialogBody>
       </DialogContent>
     </Dialog>
   );

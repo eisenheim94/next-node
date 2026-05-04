@@ -31,16 +31,15 @@ export function ProjectCreateDialog({
   creationUnavailableMessage,
 }: ProjectCreateDialogProps) {
   const createProjectMutation = useCreateProjectMutation();
+  const { isPending: submitting } = createProjectMutation;
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
     setError(null);
 
     try {
@@ -63,8 +62,6 @@ export function ProjectCreateDialog({
       toast.error('Project creation failed', {
         description: message,
       });
-    } finally {
-      setSubmitting(false);
     }
   }
 

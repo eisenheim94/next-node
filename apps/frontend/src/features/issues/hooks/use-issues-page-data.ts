@@ -7,7 +7,8 @@ import {
   useIssuesQuery,
   useProjectsQuery,
 } from '@/features/issues/api/use-issues';
-import { useCurrentUserQuery, useUsersQuery } from '@/features/shared/api/use-session';
+import { useCurrentUserQuery } from '@/features/shared/api/use-session';
+import { useUsersQuery } from '@/features/users/api/use-users';
 import type { GetIssuesParams } from '@/types/issue';
 import { isElevatedUserRole } from '@/types/user';
 
@@ -28,7 +29,8 @@ export function useIssuesPageData(issueQuery: GetIssuesParams) {
   const loading =
     issuesQuery.isLoading ||
     projectsQuery.isLoading ||
-    currentUserQuery.isLoading;
+    currentUserQuery.isLoading ||
+    usersQuery.isLoading;
 
   const errorMessage =
     issuesQuery.error instanceof Error

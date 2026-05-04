@@ -127,6 +127,8 @@ Quiz:
 - API design, generics, pagination/filtering
 
 ### Phase 4: State management properly
+Status: Completed
+
 Introduce:
 - TanStack Query for server state
 - Redux Toolkit for client/UI state
@@ -142,6 +144,9 @@ Completed:
 - shadcn/ui refactor for `projects`, `issues`, and `users` pages with modal-based create flows for the existing project/issue actions
 - responsive entity card-grid layout for the main protected CRUD pages
 - skeleton loading states for the `issues`, `projects`, and `users` list pages
+- TanStack Query hooks and mutations for core server data flows with cache invalidation
+- Redux Toolkit slices for client/UI state (issue filters and related controls)
+- boundary hardening updates: users query ownership cleanup, issue-page loading consistency, mutation pending state sourced from TanStack Query
 
 Quiz:
 - when to use TanStack Query vs Redux

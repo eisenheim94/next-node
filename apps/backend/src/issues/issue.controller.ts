@@ -25,7 +25,6 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
-import { IssueEntity } from './entities/issue.entity';
 import { IssueService } from './issue.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiErrorResponseDto } from 'src/auth/dto/api-error-response.dto';

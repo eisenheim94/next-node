@@ -165,7 +165,27 @@ Focus:
 Quiz:
 - async flow, retries, event design
 
-### Phase 6: WebSockets for real-time collaboration
+### Phase 6: PostgreSQL performance and Redis caching
+Implement:
+- PostgreSQL indexes for real query patterns
+- basic query analysis with `EXPLAIN`
+- Redis cache for selected read-heavy endpoints
+- cache invalidation after related mutations
+
+Focus:
+- B-tree, composite, and partial index selection
+- tradeoffs between read performance and write cost
+- cache-aside strategy
+- TTL and invalidation design
+- deciding what belongs in the database layer vs the cache layer
+
+Quiz:
+- when to add an index
+- how composite index order affects query performance
+- when Redis helps and when it adds unnecessary complexity
+- how to keep cached data consistent enough for the product
+
+### Phase 7: WebSockets for real-time collaboration
 Implement:
 - live issue updates
 - live comments
@@ -180,7 +200,7 @@ Focus:
 Quiz:
 - real-time architecture and consistency concerns
 
-### Phase 7: Dashboard analytics with Chart.js
+### Phase 8: Dashboard analytics with Chart.js
 Implement:
 - issues by status
 - issues by priority
@@ -195,7 +215,7 @@ Focus:
 Quiz:
 - analytics endpoint design and chart data modeling
 
-### Phase 8: Playwright end-to-end testing
+### Phase 9: Playwright end-to-end testing
 Add browser-level tests after the application is fully built.
 
 Test scope:

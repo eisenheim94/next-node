@@ -1,26 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
+import {
+  IssueCreatedEvent,
+  IssueStatusChangedEvent,
+} from 'src/messaging/contracts/issue-events';
+import { IssueEventPattern } from 'src/messaging/rabbitmq.constants';
+import { RabbitMqService } from 'src/messaging/rabbitmq.service';
 
-import { ProjectEntity } from '../projects/entities/project.entity';
-import { UserEntity } from '../users/entities/user.entity';
-import { CreateIssueDto } from './dto/create-issue.dto';
-import { UpdateIssueDto } from './dto/update-issue.dto';
-import { IssueEntity } from './entities/issue.entity';
-import { IssueSortBy, ListIssuesQueryDto } from './dto/list-issues-query.dto';
-import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
-import { IssueResponseDto } from './dto/issue-response.dto';
-import { PaginatedIssuesResponseDto } from './dto/paginated-issues-response.dto';
+import {Injectable, Logger, NotFoundException} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+
+import {ProjectEntity} from '../projects/entities/project.entity';
+import {UserEntity} from '../users/entities/user.entity';
+import {CreateIssueDto} from './dto/create-issue.dto';
+import {UpdateIssueDto} from './dto/update-issue.dto';
+import {IssueEntity} from './entities/issue.entity';
+import {IssueSortBy, ListIssuesQueryDto} from './dto/list-issues-query.dto';
+import {IssueResponseDto} from './dto/issue-response.dto';
+import {PaginatedIssuesResponseDto} from './dto/paginated-issues-response.dto';
 
 @Injectable()
 export class IssueService {
+  private readonly logger = new Logger(IssueService.name);
+
   constructor(
     @InjectRepository(IssueEntity)
     private readonly issuesRepository: Repository<IssueEntity>,
     @InjectRepository(ProjectEntity)
     private readonly projectsRepository: Repository<ProjectEntity>,
     @InjectRepository(UserEntity)
-    private readonly usersRepositry: Repository<UserEntity>,
+    private readonly usersRepository: Repository<UserEntity>,
+    private readonly rabbitMqService: RabbitMqService,
   ) { }
 
   async create(createIssueDto: CreateIssueDto): Promise<IssueResponseDto> {
@@ -42,13 +52,17 @@ export class IssueService {
     });
 
     const savedIssue = await this.issuesRepository.save(issue);
+    const createdIssue = await this.findOne(savedIssue.id);
 
-    return this.findOne(savedIssue.id);
+    await this.publishIssueCreatedEvent(createdIssue);
+
+    return createdIssue;
   }
 
 
   async update(id: string, updateIssueDto: UpdateIssueDto): Promise<IssueResponseDto> {
     const issue = await this.findOne(id);
+    const previousStatus = issue.status;
 
     if (updateIssueDto.projectId !== undefined) {
       await this.ensureProjectExists(updateIssueDto.projectId);
@@ -82,8 +96,16 @@ export class IssueService {
     }
 
     await this.issuesRepository.save(issue);
+    const updatedIssue = await this.findOne(id);
 
-    return this.findOne(id);
+    if (
+      updateIssueDto.status !== undefined &&
+      previousStatus !== updateIssueDto.status
+    ) {
+      await this.publishIssueStatusChangedEvent(updatedIssue, previousStatus);
+    }
+
+    return updatedIssue;
   }
 
   async remove(id: string): Promise<void> {
@@ -221,12 +243,65 @@ export class IssueService {
   }
 
   private async ensureUserExists(userId: string, label: string): Promise<void> {
-    const user = await this.usersRepositry.findOne({
+    const user = await this.usersRepository.findOne({
       where: { id: userId },
     });
 
     if (!user) {
       throw new NotFoundException(`${label} with id "${userId}" was not found`);
+    }
+  }
+
+  private async publishIssueCreatedEvent(issue: IssueResponseDto): Promise<void> {
+    const event: IssueCreatedEvent = {
+      eventId: randomUUID(),
+      pattern: IssueEventPattern.ISSUE_CREATED,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        issueId: issue.id,
+        title: issue.title,
+        status: issue.status,
+        priority: issue.priority,
+        projectId: issue.projectId,
+        reporterId: issue.reporterId,
+        assigneeId: issue.assigneeId,
+      },
+    };
+
+    await this.publishEvent(event.pattern, event);
+  }
+
+  private async publishIssueStatusChangedEvent(
+    issue: IssueResponseDto,
+    previousStatus: IssueResponseDto['status'],
+  ): Promise<void> {
+    const event: IssueStatusChangedEvent = {
+      eventId: randomUUID(),
+      pattern: IssueEventPattern.ISSUE_STATUS_CHANGED,
+      occurredAt: new Date().toISOString(),
+      payload: {
+        issueId: issue.id,
+        title: issue.title,
+        previousStatus,
+        currentStatus: issue.status,
+        priority: issue.priority,
+        projectId: issue.projectId,
+        reporterId: issue.reporterId,
+        assigneeId: issue.assigneeId,
+      },
+    };
+
+    await this.publishEvent(event.pattern, event);
+  }
+
+  private async publishEvent(
+    pattern: IssueEventPattern,
+    event: IssueCreatedEvent | IssueStatusChangedEvent,
+  ): Promise<void> {
+    try {
+      await this.rabbitMqService.publish(pattern, event);
+    } catch (error) {
+      this.logger.error(`Failed to publish event: ${pattern}`, error);
     }
   }
 

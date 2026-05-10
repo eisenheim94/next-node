@@ -9,9 +9,10 @@ import { ProjectModule } from './projects/project.module';
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CommentModule } from './comments/comment.module';
+import { AuditModule } from './audit/audit.module';
+import { NotificationModule } from './notifications/notification.module';
 import type { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { getTypeOrmOptions } from './database/typeorm.config';
-
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { getTypeOrmOptions } from './database/typeorm.config';
     ProjectModule,
     IssueModule,
     CommentModule,
+    AuditModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

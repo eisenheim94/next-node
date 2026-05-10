@@ -10,6 +10,9 @@ export const queryKeys = {
   projects: {
     all: ['projects'] as const,
   },
+  notifications: {
+    all: ['notifications'] as const,
+  },
   issues: {
     all: ['issues'] as const,
     lists: () => ['issues', 'list'] as const,

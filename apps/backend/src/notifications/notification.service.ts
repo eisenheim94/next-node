@@ -48,6 +48,10 @@ export class NotificationService {
       where: {
         recipientId: userId,
       },
+      relations: {
+        recipient: true,
+        issue: true,
+      },
       order: {
         createdAt: 'DESC',
       },
@@ -83,8 +87,18 @@ export class NotificationService {
       id: notification.id,
       sourceEventId: notification.sourceEventId,
       eventType: notification.eventType,
-      issueId: notification.issueId,
-      recipientId: notification.recipientId,
+      issue: {
+        id: notification.issue.id,
+        title: notification.issue.title,
+        status: notification.issue.status,
+        priority: notification.issue.priority,
+      },
+      recipient: {
+        id: notification.recipient.id,
+        email: notification.recipient.email,
+        displayName: notification.recipient.displayName,
+        role: notification.recipient.role,
+      },
       message: notification.message,
       readAt: notification.readAt,
       createdAt: notification.createdAt,

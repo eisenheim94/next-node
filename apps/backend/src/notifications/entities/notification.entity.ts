@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 
 import { UserEntity } from 'src/users/entities/user.entity';
+import { IssueEntity } from '../../issues/entities/issue.entity';
 
 @Entity({ name: 'notifications' })
 @Index(['sourceEventId', 'recipientId'], { unique: true })
@@ -27,6 +28,10 @@ export class NotificationEntity {
 
   @Column({ type: 'uuid' })
   recipientId!: string;
+
+  @ManyToOne(() => IssueEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'issueId' })
+  issue!: IssueEntity;
 
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'recipientId' })

@@ -59,7 +59,6 @@ export class IssueService {
     return createdIssue;
   }
 
-
   async update(id: string, updateIssueDto: UpdateIssueDto): Promise<IssueResponseDto> {
     const issue = await this.findOne(id);
     const previousStatus = issue.status;

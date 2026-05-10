@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IssueUserSummaryDto } from 'src/issues/dto/issue-user-summary.dto';
+import { UserSummaryDto } from 'src/users/dto/user-summary.dto';
 
 export class CommentResponseDto {
   @ApiProperty({
@@ -22,8 +22,8 @@ export class CommentResponseDto {
   })
   authorId!: string;
 
-  @ApiProperty({ type: IssueUserSummaryDto })
-  author!: IssueUserSummaryDto;
+  @ApiProperty({ type: UserSummaryDto })
+  author!: UserSummaryDto;
 
   @ApiProperty({
     example: '2026-04-25T12:30:00.000Z',

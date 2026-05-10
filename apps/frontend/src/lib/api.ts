@@ -8,6 +8,8 @@ import type {
   Issue,
   PaginatedIssues,
 } from '@/types/issue';
+import type { Notification } from '@/types/notification';
+
 import type { CreateProjectInput, Project } from '@/types/project';
 import type { User } from '@/types/user';
 
@@ -170,6 +172,14 @@ export async function getMe(): Promise<AuthResponse['user']> {
   });
 
   return handleResponse<AuthResponse['user']>(response);
+}
+
+export async function getNotifications(): Promise<Notification[]> {
+  const response = await authenticatedFetch(`${API_URL}/notifications`, {
+    cache: 'no-store',
+  });
+
+  return handleResponse<Notification[]>(response);
 }
 
 export async function getUsers(): Promise<User[]> {

@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserSummaryDto } from '../../users/dto/user-summary.dto';
+import { IssueSummaryDto } from '../../issues/dto/issue-summary.dto';
 
 export class NotificationResponseDto {
   @ApiProperty()
@@ -10,11 +12,11 @@ export class NotificationResponseDto {
   @ApiProperty()
   eventType!: string;
 
-  @ApiProperty()
-  issueId!: string;
+  @ApiProperty({ type: IssueSummaryDto })
+  issue!: IssueSummaryDto;
 
-  @ApiProperty()
-  recipientId!: string;
+  @ApiProperty({ type: UserSummaryDto })
+  recipient!: UserSummaryDto;
 
   @ApiProperty()
   message!: string;

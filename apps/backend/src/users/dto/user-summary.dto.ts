@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from 'src/core/types';
 
-export class IssueUserSummaryDto {
+export class UserSummaryDto {
   @ApiProperty()
   id!: string;
 

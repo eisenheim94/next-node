@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IssuePriority, IssueStatus } from 'src/core/types';
 import { IssueProjectSummaryDto } from './issue-project-summary.dto';
-import { IssueUserSummaryDto } from './issue-user-summary.dto';
+import { UserSummaryDto } from '../../users/dto/user-summary.dto';
 
 export class IssueResponseDto {
   @ApiProperty()
@@ -31,11 +31,11 @@ export class IssueResponseDto {
   @ApiProperty({ type: IssueProjectSummaryDto })
   project!: IssueProjectSummaryDto;
 
-  @ApiProperty({ type: IssueUserSummaryDto, nullable: true })
-  assignee!: IssueUserSummaryDto | null;
+  @ApiProperty({ type: UserSummaryDto, nullable: true })
+  assignee!: UserSummaryDto | null;
 
-  @ApiProperty({ type: IssueUserSummaryDto })
-  reporter!: IssueUserSummaryDto;
+  @ApiProperty({ type: UserSummaryDto })
+  reporter!: UserSummaryDto;
 
   @ApiProperty({ example: 3 })
   commentCount!: number;

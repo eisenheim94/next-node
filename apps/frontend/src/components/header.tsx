@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Overview' },
   { href: '/projects', label: 'Projects' },
   { href: '/issues', label: 'Issues' },
+  { href: '/notifications', label: 'Notifications' },
   { href: '/users', label: 'Users' },
 ];
 

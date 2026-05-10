@@ -60,7 +60,7 @@ export class IssueService {
   }
 
   async update(id: string, updateIssueDto: UpdateIssueDto): Promise<IssueResponseDto> {
-    const issue = await this.findOne(id);
+    const issue = await this.findOneEntity(id);
     const previousStatus = issue.status;
 
     if (updateIssueDto.projectId !== undefined) {
@@ -261,9 +261,9 @@ export class IssueService {
         title: issue.title,
         status: issue.status,
         priority: issue.priority,
-        projectId: issue.projectId,
-        reporterId: issue.reporterId,
-        assigneeId: issue.assigneeId,
+        projectId: issue.project.id,
+        reporterId: issue.reporter.id,
+        assigneeId: issue.assignee?.id ?? null,
       },
     };
 
@@ -284,9 +284,9 @@ export class IssueService {
         previousStatus,
         currentStatus: issue.status,
         priority: issue.priority,
-        projectId: issue.projectId,
-        reporterId: issue.reporterId,
-        assigneeId: issue.assigneeId,
+        projectId: issue.project.id,
+        reporterId: issue.reporter.id,
+        assigneeId: issue.assignee?.id ?? null,
       },
     };
 
@@ -311,9 +311,6 @@ export class IssueService {
       description: issue.description,
       status: issue.status,
       priority: issue.priority,
-      projectId: issue.projectId,
-      reporterId: issue.reporterId,
-      assigneeId: issue.assigneeId,
       project: {
         id: issue.project.id,
         name: issue.project.name,

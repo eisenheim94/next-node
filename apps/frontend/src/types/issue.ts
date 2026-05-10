@@ -11,9 +11,6 @@ export interface Issue {
   description: string | null;
   status: IssueStatus;
   priority: IssuePriority;
-  projectId: string;
-  reporterId: string;
-  assigneeId: string | null;
   project: Project;
   reporter: User;
   assignee: User | null;

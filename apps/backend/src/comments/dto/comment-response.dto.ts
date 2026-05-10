@@ -17,11 +17,6 @@ export class CommentResponseDto {
   })
   issueId!: string;
 
-  @ApiProperty({
-    example: '43d7b7b5-9e5f-48d7-8d7f-c33c82db9c51',
-  })
-  authorId!: string;
-
   @ApiProperty({ type: UserSummaryDto })
   author!: UserSummaryDto;
 

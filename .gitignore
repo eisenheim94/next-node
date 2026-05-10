@@ -7,5 +7,6 @@ node_modules
 dist
 .next
 coverage
+*.tsbuildinfo
 apps/backend/dist
 apps/frontend/.next

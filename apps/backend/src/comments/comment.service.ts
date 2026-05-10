@@ -88,7 +88,6 @@ export class CommentService {
       id: comment.id,
       body: comment.body,
       issueId: comment.issueId,
-      authorId: comment.authorId,
       author: {
         id: comment.author.id,
         email: comment.author.email,

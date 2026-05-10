@@ -19,15 +19,6 @@ export class IssueResponseDto {
   @ApiProperty({ enum: IssuePriority })
   priority!: IssuePriority;
 
-  @ApiProperty()
-  projectId!: string;
-
-  @ApiProperty({ nullable: true })
-  assigneeId!: string | null;
-
-  @ApiProperty()
-  reporterId!: string;
-
   @ApiProperty({ type: IssueProjectSummaryDto })
   project!: IssueProjectSummaryDto;
 
